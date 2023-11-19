@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
+    "dayjs": "^1.11.10",
     "execa": "^8.0.1",
     "lodash": "^4.17.21",
     "next": "14.0.3",
