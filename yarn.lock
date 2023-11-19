@@ -138,6 +138,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@heroicons/react@npm:^2.0.18":
+  version: 2.0.18
+  resolution: "@heroicons/react@npm:2.0.18"
+  peerDependencies:
+    react: ">= 16"
+  checksum: 3cef7f67c65f8b00dc4f23788e468e661a24bd805f80e3b5514a986d69c91ef05407cf50078691573eced47147db87a9bd00cc165e4fecd2a9657cbaf3eaafb5
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.11.13":
   version: 0.11.13
   resolution: "@humanwhocodes/config-array@npm:0.11.13"
@@ -1668,6 +1677,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fabkube@workspace:."
   dependencies:
+    "@heroicons/react": "npm:^2.0.18"
     "@material-tailwind/react": "npm:^2.1.4"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"

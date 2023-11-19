@@ -32,23 +32,29 @@ export async function getClusters({
 }: {
   kubeContext: string
 }): Promise<ClusterMap> {
-  const { stdout } =
-    await $`kubectl get --context=${kubeContext} clusters.postgresql.cnpg.io -A -o json`
+  try {
+    const { stdout } =
+      await $`kubectl get --context=${kubeContext} clusters.postgresql.cnpg.io -A -o json`
 
-  // const { stdout } =
-  //   await $`kubectl cnpg --context=${kubeContext} --namespace=${ns} status ${cluster} -o json`
-  const clusters = getClustersSchema.parse(JSON.parse(stdout))
+    // const { stdout } =
+    //   await $`kubectl cnpg --context=${kubeContext} --namespace=${ns} status ${cluster} -o json`
+    const clusters = getClustersSchema.parse(JSON.parse(stdout))
 
-  const result = R.groupBy(
-    clusters.items,
-    (cluster) => cluster.metadata.namespace
-  )
-  console.log(result)
-  return result
+    const result = R.groupBy(
+      clusters.items,
+      (cluster) => cluster.metadata.namespace
+    )
+    console.log(result)
+    return result
+  } catch (e) {
+    console.error(e)
+    return {}
+  }
 }
 
 export async function getContexts() {
-  return await $`kubectl config get-contexts -o name`
+  const { stdout } = await $`kubectl config get-contexts -o name`
+  return stdout.split("\n")
 }
 
 // // PhaseSwitchover when a cluster is changing the primary node
