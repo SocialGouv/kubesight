@@ -46,6 +46,10 @@ export const clusterSchema = z.object({
   }),
 })
 export type Cluster = z.infer<typeof clusterSchema>
+export type Namespace = {
+  name: string
+  clusters: Cluster[]
+}
 
 export function isReady(cluster: Cluster): boolean {
   return cluster.status.instances === cluster.status.readyInstances

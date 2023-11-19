@@ -1,37 +1,19 @@
-// import * as k8s from "@kubernetes/client-node";
-//
-// const kc = new k8s.KubeConfig();
-// kc.loadFromDefault();
-//
-// const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-//
-// export const main = async () => {
-//   try {
-//     const namespaces = await k8sApi.listNamespace();
-//     return { namespaces: namespaces.body.items };
-//   } catch (err) {
-//     console.error(err);
-//   }
-// };
-
 "use server"
 
-import * as R from "remeda"
+import * as _ from "lodash"
 import { $ } from "execa"
 import { z } from "zod"
-import { Cluster, clusterSchema } from "@/lib/kube/types"
-
-export type ClusterMap = Record<string, Cluster[]>
+import { Namespace, clusterSchema } from "@/lib/kube/types"
 
 const getClustersSchema = z.object({
   items: z.array(clusterSchema),
 })
 
-export async function getClusters({
+export async function getNamespaces({
   kubeContext,
 }: {
   kubeContext: string
-}): Promise<ClusterMap> {
+}): Promise<Array<Namespace>> {
   try {
     const { stdout } =
       await $`kubectl get --context=${kubeContext} clusters.postgresql.cnpg.io -A -o json`
@@ -40,15 +22,23 @@ export async function getClusters({
     //   await $`kubectl cnpg --context=${kubeContext} --namespace=${ns} status ${cluster} -o json`
     const clusters = getClustersSchema.parse(JSON.parse(stdout))
 
-    const result = R.groupBy(
-      clusters.items,
-      (cluster) => cluster.metadata.namespace
-    )
-    console.log(result)
-    return result
+    // const result = R.groupBy(
+    //   clusters.items,
+    //   (cluster) => cluster.metadata.namespace
+    // )
+
+    const namespaces = _.chain(clusters.items)
+      .groupBy((cluster) => cluster.metadata.namespace)
+      .map((clusters, namespaceName) => {
+        return { name: namespaceName, clusters }
+      })
+      .value()
+
+    console.log(namespaces)
+    return namespaces
   } catch (e) {
     console.error(e)
-    return {}
+    return []
   }
 }
 
