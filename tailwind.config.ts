@@ -1,9 +1,20 @@
 import type { Config } from "tailwindcss"
-import withMT from "@material-tailwind/react/utils/withMT"
+import colors from "tailwindcss/colors"
 
-const config: Config = withMT({
+const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  theme: {},
+  theme: {
+    colors: {
+      transparent: "transparent",
+      current: "currentColor",
+      black: colors.black,
+      white: colors.white,
+      gray: colors.gray,
+      emerald: colors.emerald,
+      indigo: colors.indigo,
+      yellow: colors.yellow,
+    },
+  },
   plugins: [],
-})
+}
 export default config

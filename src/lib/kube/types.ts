@@ -54,3 +54,34 @@ export type Namespace = {
 export function isReady(cluster: Cluster): boolean {
   return cluster.status.instances === cluster.status.readyInstances
 }
+
+export function getInstances(cluster: Cluster) {
+  const primary = cluster.status.currentPrimary
+
+  const healthy =
+    cluster.status.instancesStatus.healthy?.map((i) => {
+      return { name: i, status: "healthy" }
+    }) ?? []
+  const replicating =
+    cluster.status.instancesStatus.replicating?.map((i) => {
+      return { name: i, status: "replicating" }
+    }) ?? []
+  const failed =
+    cluster.status.instancesStatus.failed?.map((i) => {
+      return { name: i, status: "failed" }
+    }) ?? []
+
+  const instances = healthy
+    .concat(replicating)
+    .concat(failed)
+    .map(({ name, status }) => {
+      return {
+        name,
+        status,
+        isPrimary: name === primary,
+        shortName: name.split("-").pop() ?? name,
+      }
+    })
+  console.log(instances)
+  return instances
+}
