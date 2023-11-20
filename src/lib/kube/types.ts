@@ -73,6 +73,10 @@ export type Cluster = RawCluster & {
     used: string
     percentUsed: string
   }
+  podStats: {
+    cpu: string
+    memory: string
+  }
 }
 export type Namespace = {
   name: string

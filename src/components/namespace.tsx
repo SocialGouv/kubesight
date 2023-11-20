@@ -40,8 +40,9 @@ export async function ClusterStatus({ cluster }: { cluster: Cluster }) {
       <div className="p-2">
         <div className="flex flex-row justify-between">
           <span className="font-bold">{cluster.metadata.name}</span>
-          <span className="text-xs text-gray-500">
-            {dayjs(cluster.metadata.creationTimestamp).fromNow()}
+          <span className="text-xs text-gray-500 text-right">
+            <div>{dayjs(cluster.metadata.creationTimestamp).fromNow()}</div>
+            <div>{cluster.metadata.labels?.["helm.sh/chart"]}</div>
           </span>
         </div>
         <div className="flex gap-1">
@@ -92,18 +93,18 @@ export async function ClusterStatus({ cluster }: { cluster: Cluster }) {
               className={`h-4 w-4 inline-block mr-2`}
               icon={faMemory}
             />
-            {(cluster.spec.resources?.requests?.memory ?? "none") +
-              " / " +
-              (cluster.spec.resources?.limits?.memory ?? "none")}
+            {`${cluster.spec.resources?.requests?.memory ?? "none"} / ${
+              cluster.podStats.memory
+            } / ${cluster.spec.resources?.limits?.memory ?? "none"}`}
           </span>
           <span className="font-bold text-xs text-gray-500 pr-2">
             <FontAwesomeIcon
               className={`h-4 w-4 inline-block mr-2`}
               icon={faMicrochip}
-            />
-            {(cluster.spec.resources?.requests?.cpu ?? "none") +
-              " / " +
-              (cluster.spec.resources?.limits?.cpu ?? "none")}
+            />{" "}
+            {`${cluster.spec.resources?.requests?.cpu ?? "none"} / ${
+              cluster.podStats.cpu
+            } / ${cluster.spec.resources?.limits?.cpu ?? "none"}`}
           </span>
         </div>
         <div className="">

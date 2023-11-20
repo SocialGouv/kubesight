@@ -4,7 +4,7 @@ import _ from "lodash"
 import { $ } from "execa"
 import { z } from "zod"
 import async from "async"
-import { Namespace, clusterSchema, Cluster, RawCluster } from "@/lib/kube/types"
+import { Namespace, clusterSchema, RawCluster } from "@/lib/kube/types"
 
 const getClustersSchema = z.object({
   items: z.array(clusterSchema),
@@ -23,15 +23,23 @@ export async function getNamespaces({
     //   await $`kubectl cnpg --context=${kubeContext} --namespace=${ns} status ${cluster} -o json`
     const clusters = getClustersSchema.parse(JSON.parse(stdout)).items
 
-    const clustersWithStorage = await async.map(
+    const clustersWithStats = await async.map(
       clusters,
       async (cluster: RawCluster) => {
-        const storageStats = await getCnpgStorageStats({ kubeContext, cluster })
-        return { ...cluster, storageStats }
+        const storageStatsPromise = getCnpgStorageStats({
+          kubeContext,
+          cluster,
+        })
+        const podStatsPromise = getCnpgPodStats({ kubeContext, cluster })
+        const [storageStats, podStats] = await Promise.all([
+          storageStatsPromise,
+          podStatsPromise,
+        ])
+        return { ...cluster, storageStats, podStats }
       }
     )
 
-    const namespaces = _.chain(clustersWithStorage)
+    const namespaces = _.chain(clustersWithStats)
       .groupBy((cluster) => cluster.metadata.namespace)
       .map((clusters, namespaceName) => {
         return { name: namespaceName, clusters }
@@ -50,7 +58,7 @@ export async function getContexts() {
   return stdout.split("\n")
 }
 
-export async function getCnpgStorageStats({
+async function getCnpgStorageStats({
   kubeContext,
   cluster,
 }: {
@@ -74,6 +82,20 @@ export async function getCnpgStorageStats({
     postgresLine.split(/\s+/)
 
   return { total, used, percentUsed }
+}
+
+async function getCnpgPodStats({
+  kubeContext,
+  cluster,
+}: {
+  kubeContext: string
+  cluster: RawCluster
+}) {
+  const { stdout } =
+    await $`kubectl top --context=${kubeContext} --namespace ${cluster.metadata.namespace} --no-headers=true pod ${cluster.status.currentPrimary}`
+  const [_pod, cpu, memory] = stdout.split(/\s+/)
+
+  return { cpu, memory }
 }
 
 // // PhaseSwitchover when a cluster is changing the primary node
