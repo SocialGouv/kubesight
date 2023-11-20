@@ -1,5 +1,7 @@
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faTimeline } from "@fortawesome/free-solid-svg-icons"
 
 import { isReady, Cluster, Namespace, getInstances } from "@/lib/kube/types"
 
@@ -52,6 +54,24 @@ export async function ClusterStatus({ cluster }: { cluster: Cluster }) {
               dotText={dayjs(cluster.status.currentPrimaryTimestamp).fromNow()}
             ></Badge>
           ))}
+        </div>
+        <div className="py-2">
+          {cluster.status.lastSuccessfulBackup ? (
+            <>
+              <span className="font-bold text-xs text-gray-500 pr-2">
+                {dayjs(cluster.status.firstRecoverabilityPoint).fromNow()}
+              </span>
+              <FontAwesomeIcon
+                className={`h-4 w-4 inline-block`}
+                icon={faTimeline}
+              />
+              <span className="font-bold text-xs text-gray-500 pl-2">
+                {dayjs(cluster.status.lastSuccessfulBackup).fromNow()}
+              </span>
+            </>
+          ) : (
+            <span className="font-bold text-xs text-orange-500">no backup</span>
+          )}
         </div>
         <ul>
           <li>{cluster.status.phase}</li>

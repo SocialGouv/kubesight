@@ -13,6 +13,8 @@ const config: Config = {
       emerald: colors.emerald,
       indigo: colors.indigo,
       yellow: colors.yellow,
+      red: colors.red,
+      orange: colors.orange,
     },
   },
   plugins: [],

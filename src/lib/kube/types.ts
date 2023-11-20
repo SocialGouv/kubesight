@@ -32,8 +32,8 @@ export const clusterSchema = z.object({
     targetPrimary: z.string(),
     targetPrimaryTimestamp: z.coerce.date(),
     phase: z.string(),
-    // firstRecoverabilityPoint: z.coerce.date(),
-    // lastSuccessfulBackup: z.coerce.date(),
+    firstRecoverabilityPoint: z.optional(z.coerce.date()),
+    lastSuccessfulBackup: z.optional(z.coerce.date()),
     conditions: z.array(
       z.object({
         type: z.string(),
