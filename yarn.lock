@@ -357,6 +357,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/async@npm:^3":
+  version: 3.2.23
+  resolution: "@types/async@npm:3.2.23"
+  checksum: 0c1da26927bd2a670230bbb42c680d652f3ed90ab8299b77a5f9bb303da9c777fa1b7e21f731622961924db607fac9e7257b46954354cea9afb68e4252afe5c0
+  languageName: node
+  linkType: hard
+
 "@types/json5@npm:^0.0.29":
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
@@ -709,6 +716,13 @@ __metadata:
   version: 0.0.8
   resolution: "ast-types-flow@npm:0.0.8"
   checksum: f2a0ba8055353b743c41431974521e5e852a9824870cd6fce2db0e538ac7bf4da406bbd018d109af29ff3f8f0993f6a730c9eddbd0abd031fbcb29ca75c1014e
+  languageName: node
+  linkType: hard
+
+"async@npm:^3.2.5":
+  version: 3.2.5
+  resolution: "async@npm:3.2.5"
+  checksum: 1408287b26c6db67d45cb346e34892cee555b8b59e6c68e6f8c3e495cad5ca13b4f218180e871f3c2ca30df4ab52693b66f2f6ff43644760cab0b2198bda79c1
   languageName: node
   linkType: hard
 
@@ -1566,10 +1580,12 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": "npm:^6.4.2"
     "@fortawesome/react-fontawesome": "npm:^0.2.0"
     "@heroicons/react": "npm:^2.0.18"
+    "@types/async": "npm:^3"
     "@types/lodash": "npm:^4"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
+    async: "npm:^3.2.5"
     autoprefixer: "npm:^10.0.1"
     dayjs: "npm:^1.11.10"
     eslint: "npm:^8"

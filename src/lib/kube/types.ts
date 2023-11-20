@@ -12,11 +12,32 @@ export const clusterSchema = z.object({
     ),
     // managedFields: edition history
   }),
-  // spec
-  //   s3 info
-  //   resources
-  //   storage size
-  //   postgresqlParams
+  spec: z.object({
+    //   s3 info
+    //   storage size
+    //   postgresqlParams
+    resources: z.optional(
+      z.object({
+        limits: z.optional(
+          z.object({
+            cpu: z.optional(z.string()),
+            memory: z.optional(z.string()),
+          })
+        ),
+        requests: z.optional(
+          z.object({
+            cpu: z.optional(z.string()),
+            memory: z.optional(z.string()),
+          })
+        ),
+      })
+    ),
+    storage: z.object({
+      size: z.string(),
+    }),
+    minSyncReplicas: z.number(),
+    maxSyncReplicas: z.number(),
+  }),
   status: z.object({
     instances: z.number(),
     instanceNames: z.array(z.string()),
@@ -45,7 +66,14 @@ export const clusterSchema = z.object({
     ),
   }),
 })
-export type Cluster = z.infer<typeof clusterSchema>
+export type RawCluster = z.infer<typeof clusterSchema>
+export type Cluster = RawCluster & {
+  storageStats: {
+    total: string
+    used: string
+    percentUsed: string
+  }
+}
 export type Namespace = {
   name: string
   clusters: Cluster[]

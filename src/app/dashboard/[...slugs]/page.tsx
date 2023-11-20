@@ -2,7 +2,11 @@ import MyBreadcrumbs from "@/components/breadcrumbs"
 import Namespace from "@/components/namespace"
 import { getNamespaces } from "@/lib/kube"
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: { slugs: string[] }
+}) {
   let [kubeContext] = params?.slugs
   kubeContext = kubeContext ?? "prod"
   const namespaces = await getNamespaces({ kubeContext })

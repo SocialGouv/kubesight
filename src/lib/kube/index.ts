@@ -1,9 +1,10 @@
 "use server"
 
-import * as _ from "lodash"
+import _ from "lodash"
 import { $ } from "execa"
 import { z } from "zod"
-import { Namespace, clusterSchema } from "@/lib/kube/types"
+import async from "async"
+import { Namespace, clusterSchema, Cluster, RawCluster } from "@/lib/kube/types"
 
 const getClustersSchema = z.object({
   items: z.array(clusterSchema),
@@ -20,21 +21,23 @@ export async function getNamespaces({
 
     // const { stdout } =
     //   await $`kubectl cnpg --context=${kubeContext} --namespace=${ns} status ${cluster} -o json`
-    const clusters = getClustersSchema.parse(JSON.parse(stdout))
+    const clusters = getClustersSchema.parse(JSON.parse(stdout)).items
 
-    // const result = R.groupBy(
-    //   clusters.items,
-    //   (cluster) => cluster.metadata.namespace
-    // )
+    const clustersWithStorage = await async.map(
+      clusters,
+      async (cluster: RawCluster) => {
+        const storageStats = await getCnpgStorageStats({ kubeContext, cluster })
+        return { ...cluster, storageStats }
+      }
+    )
 
-    const namespaces = _.chain(clusters.items)
+    const namespaces = _.chain(clustersWithStorage)
       .groupBy((cluster) => cluster.metadata.namespace)
       .map((clusters, namespaceName) => {
         return { name: namespaceName, clusters }
       })
       .value()
 
-    console.log(namespaces)
     return namespaces
   } catch (e) {
     console.error(e)
@@ -45,6 +48,32 @@ export async function getNamespaces({
 export async function getContexts() {
   const { stdout } = await $`kubectl config get-contexts -o name`
   return stdout.split("\n")
+}
+
+export async function getCnpgStorageStats({
+  kubeContext,
+  cluster,
+}: {
+  kubeContext: string
+  cluster: RawCluster
+}) {
+  const { stdout } =
+    await $`kubectl exec --context=${kubeContext} --namespace ${cluster.metadata.namespace} ${cluster.status.currentPrimary} -- df -h`
+
+  const postgresLine = _.chain(stdout)
+    .split("\n")
+    .filter((line) => line.includes("/var/lib/postgresql/data"))
+    .first()
+    .value()
+
+  if (!postgresLine) {
+    console.error("storage: no postgres line found")
+    return { total: "?", used: "?", percentUsed: "?" }
+  }
+  const [_device, total, used, _free, percentUsed, _path] =
+    postgresLine.split(/\s+/)
+
+  return { total, used, percentUsed }
 }
 
 // // PhaseSwitchover when a cluster is changing the primary node

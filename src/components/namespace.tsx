@@ -1,7 +1,12 @@
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faTimeline } from "@fortawesome/free-solid-svg-icons"
+import {
+  faHardDrive,
+  faMemory,
+  faMicrochip,
+  faFloppyDisk,
+} from "@fortawesome/free-solid-svg-icons"
 
 import { isReady, Cluster, Namespace, getInstances } from "@/lib/kube/types"
 
@@ -42,6 +47,7 @@ export async function ClusterStatus({ cluster }: { cluster: Cluster }) {
         <div className="flex gap-1">
           {instances.map((instance) => (
             <Badge
+              key={instance.name}
               text={instance.shortName}
               dot={instance.isPrimary}
               status={
@@ -55,27 +61,65 @@ export async function ClusterStatus({ cluster }: { cluster: Cluster }) {
             ></Badge>
           ))}
         </div>
-        <div className="py-2">
+        <div className="pt-2">
           {cluster.status.lastSuccessfulBackup ? (
             <>
-              <span className="font-bold text-xs text-gray-500 pr-2">
-                {dayjs(cluster.status.firstRecoverabilityPoint).fromNow()}
-              </span>
               <FontAwesomeIcon
                 className={`h-4 w-4 inline-block`}
-                icon={faTimeline}
+                icon={faFloppyDisk}
               />
               <span className="font-bold text-xs text-gray-500 pl-2">
-                {dayjs(cluster.status.lastSuccessfulBackup).fromNow()}
+                {dayjs(cluster.status.firstRecoverabilityPoint).fromNow() +
+                  " ➡ " +
+                  dayjs(cluster.status.lastSuccessfulBackup).fromNow()}
               </span>
             </>
           ) : (
-            <span className="font-bold text-xs text-orange-500">no backup</span>
+            <>
+              <FontAwesomeIcon
+                className={`h-4 w-4 inline-block text-orange-500`}
+                icon={faFloppyDisk}
+              />
+              <span className="font-bold text-xs text-orange-500 pl-2">
+                no backup
+              </span>
+            </>
           )}
         </div>
-        <ul>
-          <li>{cluster.status.phase}</li>
-        </ul>
+        <div className="">
+          <span className="font-bold text-xs text-gray-500 pr-2">
+            <FontAwesomeIcon
+              className={`h-4 w-4 inline-block mr-2`}
+              icon={faMemory}
+            />
+            {(cluster.spec.resources?.requests?.memory ?? "none") +
+              " / " +
+              (cluster.spec.resources?.limits?.memory ?? "none")}
+          </span>
+          <span className="font-bold text-xs text-gray-500 pr-2">
+            <FontAwesomeIcon
+              className={`h-4 w-4 inline-block mr-2`}
+              icon={faMicrochip}
+            />
+            {(cluster.spec.resources?.requests?.cpu ?? "none") +
+              " / " +
+              (cluster.spec.resources?.limits?.cpu ?? "none")}
+          </span>
+        </div>
+        <div className="">
+          <span className="font-bold text-xs text-gray-500 pr-2">
+            <FontAwesomeIcon
+              className={`h-4 w-4 inline-block mr-2`}
+              icon={faHardDrive}
+            />
+            {`${cluster.storageStats.percentUsed} (${cluster.storageStats.used} / ${cluster.storageStats.total})`}
+          </span>
+        </div>
+        {cluster.status.phase !== "Cluster in healthy state" && (
+          <div className="pt-2">
+            <li>{cluster.status.phase}</li>
+          </div>
+        )}
       </div>
     </div>
   )
