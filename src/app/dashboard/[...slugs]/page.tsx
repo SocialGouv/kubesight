@@ -1,6 +1,7 @@
+import dayjs from "dayjs"
 import MyBreadcrumbs from "@/components/breadcrumbs"
 import Namespace from "@/components/namespace"
-import { getNamespaces } from "@/lib/kube"
+import { getCachedNamespaces } from "@/lib/kube"
 import { Suspense } from "react"
 
 export default async function Page({
@@ -28,13 +29,20 @@ export default async function Page({
 }
 
 async function Dashboard({ kubeContext }: { kubeContext: string }) {
-  const namespaces = await getNamespaces({ kubeContext })
+  const namespaces = await getCachedNamespaces({ kubeContext })
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-8">
-      {namespaces.map((ns) => (
-        <Namespace key={ns.name} namespace={ns}></Namespace>
-      ))}
-    </div>
+    <>
+      <div className="flex flex-col justify-center h-full mx-8 mt-2">
+        <span className="text-xs text-gray-500 text-left">
+          Last refreshed: {dayjs(namespaces.lastRefresh).fromNow()}
+        </span>
+      </div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-8">
+        {namespaces.data.map((ns) => (
+          <Namespace key={ns.name} namespace={ns}></Namespace>
+        ))}
+      </div>
+    </>
   )
 }
 

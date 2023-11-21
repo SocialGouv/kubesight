@@ -14,14 +14,15 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@heroicons/react": "^2.0.18",
-    "async": "^3.2.5",
     "dayjs": "^1.11.10",
     "execa": "^8.0.1",
     "lodash": "^4.17.21",
     "next": "14.0.3",
+    "p-map": "^6.0.0",
     "react": "^18",
     "react-dom": "^18",
     "remeda": "^1.29.0",
+    "server-only": "^0.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {

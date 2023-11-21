@@ -67,6 +67,28 @@ export const clusterSchema = z.object({
   }),
 })
 export type RawCluster = z.infer<typeof clusterSchema>
+
+export const eventSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string(),
+    creationTimestamp: z.coerce.date(),
+  }),
+  count: z.optional(z.number()),
+  // eventTime ??
+  firstTimestamp: z.coerce.date(),
+  lastTimestamp: z.coerce.date(),
+  involvedObject: z.object({
+    kind: z.string(),
+    name: z.string(),
+    namespace: z.string(),
+  }),
+  message: z.string(),
+  reason: z.string(),
+  type: z.string(),
+})
+export type RawEvent = z.infer<typeof eventSchema>
+
 export type Cluster = RawCluster & {
   storageStats: {
     total: string
@@ -81,6 +103,7 @@ export type Cluster = RawCluster & {
 export type Namespace = {
   name: string
   clusters: Cluster[]
+  events: RawEvent[]
 }
 
 export function isReady(cluster: Cluster): boolean {
@@ -114,6 +137,5 @@ export function getInstances(cluster: Cluster) {
         shortName: name.split("-").pop() ?? name,
       }
     })
-  console.log(instances)
   return instances
 }

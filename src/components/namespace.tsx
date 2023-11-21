@@ -15,20 +15,37 @@ dayjs.extend(relativeTime)
 export default function Namespace({ namespace }: { namespace: Namespace }) {
   return (
     <div className="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow border-l-8 border-emerald-400">
-      <div className="flex flex-1 flex-col p-6">{namespace.name}</div>
+      <div className="flex flex-col p-6">{namespace.name}</div>
       <div className="grid grid-cols-1 gap-6 m-2">
         {namespace.clusters.map((cluster) => (
-          <ClusterStatus
+          <ClusterWidget
             key={cluster.metadata.name}
             cluster={cluster}
-          ></ClusterStatus>
+          ></ClusterWidget>
         ))}
+        <div className="m-4">
+          <Events namespace={namespace}></Events>
+        </div>
       </div>
     </div>
   )
 }
 
-export async function ClusterStatus({ cluster }: { cluster: Cluster }) {
+function Events({ namespace }: { namespace: Namespace }) {
+  return (
+    <ul className="list-disc text-left text-xs">
+      {namespace.events
+        .filter((event) => event.type !== "Normal")
+        .map((event) => (
+          <li key={event.metadata.name}>
+            {event.type}: {event.message}
+          </li>
+        ))}
+    </ul>
+  )
+}
+
+function ClusterWidget({ cluster }: { cluster: Cluster }) {
   const clusterIsReady = isReady(cluster)
   const instances = getInstances(cluster)
   return (

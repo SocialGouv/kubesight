@@ -1,16 +1,37 @@
-"use server"
+import "server-only"
 
 import _ from "lodash"
 import { $ } from "execa"
 import { z } from "zod"
-import async from "async"
-import { Namespace, clusterSchema, RawCluster } from "@/lib/kube/types"
+import pMap from "p-map"
+import { unstable_cache } from "next/cache"
 
-const getClustersSchema = z.object({
-  items: z.array(clusterSchema),
-})
+import {
+  Namespace,
+  clusterSchema,
+  RawCluster,
+  eventSchema,
+} from "@/lib/kube/types"
 
-export async function getNamespaces({
+type CachedData<T> = {
+  data: T
+  lastRefresh: Date
+}
+
+function makeCachedData<T>(data: T): CachedData<T> {
+  return { data, lastRefresh: new Date() }
+}
+
+export const getCachedNamespaces = unstable_cache(
+  async (kubeContext) => {
+    console.log("-- refreshing data")
+    return makeCachedData(await getNamespaces(kubeContext))
+  },
+  ["namespaces"],
+  { revalidate: 60 * 5 }
+)
+
+async function getNamespaces({
   kubeContext,
 }: {
   kubeContext: string
@@ -19,25 +40,21 @@ export async function getNamespaces({
     const { stdout } =
       await $`kubectl get --context=${kubeContext} clusters.postgresql.cnpg.io -A -o json`
 
-    // const { stdout } =
-    //   await $`kubectl cnpg --context=${kubeContext} --namespace=${ns} status ${cluster} -o json`
+    const getClustersSchema = z.object({
+      items: z.array(clusterSchema),
+    })
     const clusters = getClustersSchema.parse(JSON.parse(stdout)).items
 
-    const clustersWithStats = await async.map(
-      clusters,
-      async (cluster: RawCluster) => {
-        const storageStatsPromise = getCnpgStorageStats({
+    const clustersWithStats = await pMap(clusters, async (cluster) => {
+      const [storageStats, podStats] = await Promise.all([
+        getCnpgStorageStats({
           kubeContext,
           cluster,
-        })
-        const podStatsPromise = getCnpgPodStats({ kubeContext, cluster })
-        const [storageStats, podStats] = await Promise.all([
-          storageStatsPromise,
-          podStatsPromise,
-        ])
-        return { ...cluster, storageStats, podStats }
-      }
-    )
+        }),
+        getCnpgPodStats({ kubeContext, cluster }),
+      ])
+      return { ...cluster, storageStats, podStats }
+    })
 
     const namespaces = _.chain(clustersWithStats)
       .groupBy((cluster) => cluster.metadata.namespace)
@@ -46,7 +63,14 @@ export async function getNamespaces({
       })
       .value()
 
-    return namespaces
+    const namespacesWithEvents = await pMap(namespaces, async (namespace) => {
+      return {
+        ...namespace,
+        events: await getEvents({ kubeContext, namespace: namespace.name }),
+      }
+    })
+
+    return namespacesWithEvents
   } catch (e) {
     console.error(e)
     return []
@@ -56,6 +80,22 @@ export async function getNamespaces({
 export async function getContexts() {
   const { stdout } = await $`kubectl config get-contexts -o name`
   return stdout.split("\n")
+}
+
+async function getEvents({
+  kubeContext,
+  namespace,
+}: {
+  kubeContext: string
+  namespace: string
+}) {
+  const { stdout } =
+    await $`kubectl --context=${kubeContext} get --namespace ${namespace} events -o json`
+  const getEventsSchema = z.object({
+    items: z.array(eventSchema),
+  })
+  const events = getEventsSchema.parse(JSON.parse(stdout)).items
+  return events
 }
 
 async function getCnpgStorageStats({

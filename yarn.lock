@@ -719,13 +719,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"async@npm:^3.2.5":
-  version: 3.2.5
-  resolution: "async@npm:3.2.5"
-  checksum: 1408287b26c6db67d45cb346e34892cee555b8b59e6c68e6f8c3e495cad5ca13b4f218180e871f3c2ca30df4ab52693b66f2f6ff43644760cab0b2198bda79c1
-  languageName: node
-  linkType: hard
-
 "asynciterator.prototype@npm:^1.0.0":
   version: 1.0.0
   resolution: "asynciterator.prototype@npm:1.0.0"
@@ -1585,7 +1578,6 @@ __metadata:
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
-    async: "npm:^3.2.5"
     autoprefixer: "npm:^10.0.1"
     dayjs: "npm:^1.11.10"
     eslint: "npm:^8"
@@ -1593,10 +1585,12 @@ __metadata:
     execa: "npm:^8.0.1"
     lodash: "npm:^4.17.21"
     next: "npm:14.0.3"
+    p-map: "npm:^6.0.0"
     postcss: "npm:^8"
     react: "npm:^18"
     react-dom: "npm:^18"
     remeda: "npm:^1.29.0"
+    server-only: "npm:^0.0.1"
     tailwindcss: "npm:^3.3.0"
     typescript: "npm:^5"
     zod: "npm:^3.22.4"
@@ -3076,6 +3070,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-map@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "p-map@npm:6.0.0"
+  checksum: 3fcfccf464d0f4a9a8c8a2d48f3f0933bdbdb0628158c1fb3c240dc0bbf20c0cf8115dea57300aa82baefff7b9bd1b9daf13a11a6578f15a629fc5bda78d780d
+  languageName: node
+  linkType: hard
+
 "parent-module@npm:^1.0.0":
   version: 1.0.1
   resolution: "parent-module@npm:1.0.1"
@@ -3536,6 +3537,13 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 5160b06975a38b11c1ab55950cb5b8a23db78df88275d3d8a42ccf1f29e55112ac995b3a26a522c36e3b5f76b0445f1eef70d696b8c7862a2b4303d7b0e7609e
+  languageName: node
+  linkType: hard
+
+"server-only@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "server-only@npm:0.0.1"
+  checksum: 4704f0ef85da0be981af6d4ed8e739d39bcfd265b9c246a684060acda5642d0fdc6daffc2308e71e2682c5f508090978802eae0a77623c9b90a49f9ae68048d6
   languageName: node
   linkType: hard
 
