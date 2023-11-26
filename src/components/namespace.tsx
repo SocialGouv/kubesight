@@ -9,6 +9,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 
 import { isReady, Cluster, Namespace, getInstances } from "@/lib/kube/types"
+import Events from "@/components/events"
+import Badge from "@/components/badge"
 
 dayjs.extend(relativeTime)
 
@@ -28,20 +30,6 @@ export default function Namespace({ namespace }: { namespace: Namespace }) {
         </div>
       </div>
     </div>
-  )
-}
-
-function Events({ namespace }: { namespace: Namespace }) {
-  return (
-    <ul className="list-disc text-left text-xs">
-      {namespace.events
-        .filter((event) => event.type !== "Normal")
-        .map((event) => (
-          <li key={event.metadata.name}>
-            {event.type}: {event.message}
-          </li>
-        ))}
-    </ul>
   )
 }
 
@@ -143,44 +131,30 @@ function ClusterWidget({ cluster }: { cluster: Cluster }) {
   )
 }
 
-export function Badge({
-  text,
-  dot,
-  status,
-  dotText,
-}: {
-  text: string
-  dot: boolean
-  status: Status
-  dotText?: string
-}) {
-  const color = statusColors[status]
-
-  return (
-    <span
-      className={`inline-flex items-center gap-x-1.5 rounded-full bg-${color}-100 px-1.5 py-0.5 text-xs font-medium text-${color}-700`}
-    >
-      {text}
-      {dot && (
-        <>
-          <svg
-            className={`h-1.5 w-1.5 fill-${color}-500`}
-            viewBox="0 0 6 6"
-            aria-hidden="true"
-          >
-            <circle cx={3} cy={3} r={3} />
-          </svg>
-          <span className="text-xs">{dotText ?? ""}</span>
-        </>
-      )}
-    </span>
-  )
-}
-
-type Status = "ok" | "warning" | "error"
-
-const statusColors: Record<Status, string> = {
-  ok: "emerald", // bg-emerald-100 text-emerald-700 fill-emerald-500
-  warning: "orange", // bg-orange-100 text-orange-700 fill-orange-500
-  error: "red", // bg-red-100 text-red-700 fill-red-500
-}
+// export function Tooltip({
+//   text,
+//   children,
+// }: {
+//   text: string
+//   children: React.ReactNode
+// }) {
+//   return (
+//     <span className="group flex relative">
+//       {children}
+//       <span
+//         className="group-hover:opacity-100 transition-opacity bg-gray-800 px-1 text-sm text-gray-100 rounded-md absolute left-1/2
+//     -translate-x-1/2 translate-y-full opacity-0 m-4 mx-auto"
+//       >
+//         Tooltip
+//       </span>
+//     </span>
+//   )
+//   // return (
+//   //   <div className="has-tooltip relative">
+//   //     <span className="tooltip p-1 rounded border border-gray-200 bg-gray-100 shadow-lg ml-4 text-sm -mt-8 absolute">
+//   //       {text}
+//   //     </span>
+//   //     {children}
+//   //   </div>
+//   // )
+// }
