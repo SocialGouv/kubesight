@@ -1,4 +1,16 @@
 fileignoreconfig:
+- filename: .github/workflows/deactivate.yaml
+  checksum: e0f0138068d1f9a11721ad38ff8b892f8dfbf19854f741fe60ae1d7f291fff22
+- filename: .github/workflows/preproduction.yaml
+  checksum: fa12b34d3010b6aedb0bc7f22427d8f83e98276330b9540c687710da49166368
+- filename: .github/workflows/production.yaml
+  checksum: 5e21dfc40b41f4ee43ea755bbe17e9de43c2cc3a0eb7df40087775524348d3fd
+- filename: .github/workflows/release.yml
+  checksum: 66bded9acc855b44f011cfe01fa866803ce1ad6f5ae8d8c85171418790662c6b
+- filename: .github/workflows/review-auto.yaml
+  checksum: 763ac6ec97b686b6522508c1b3ad0728ab022e116a46664289e101bfb0877c98
+- filename: .github/workflows/review.yaml
+  checksum: 8c4381d28ca109a4119fe7d8055f1179672fb1bb5bfb9fbceb116259662becfe
 - filename: yarn.lock
   checksum: dfe3ab745d4e0072215d4f9683e0135ee678d5583ade96c8cb88eee277f86867
 version: "1.0"

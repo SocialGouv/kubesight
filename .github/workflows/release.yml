@@ -1,0 +1,24 @@
+name: Release
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+      - name: Install additional semantic-release plugins
+        run: npm i --save=false semantic-release @socialgouv/releaserc @semantic-release/changelog @semantic-release/git @semantic-release/npm
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends @socialgouv/releaserc

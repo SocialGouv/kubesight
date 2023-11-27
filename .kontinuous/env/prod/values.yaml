@@ -1,0 +1,8 @@
+app:
+  resources:
+    requests:
+      cpu: 15m
+      memory: 200Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi

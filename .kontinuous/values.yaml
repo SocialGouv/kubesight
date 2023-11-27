@@ -1,0 +1,10 @@
+app:
+  ~needs: [build-app]
+  probesPath: /healthz
+
+jobs:
+  runs:
+    build-app:
+      use: build
+      with:
+        imagePackage: app

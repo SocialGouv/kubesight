@@ -30,7 +30,7 @@ const ContentSecurityPolicy =
       base-uri 'none';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: authjs.dev;
-      script-src 'self' 'unsafe-eval';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
       connect-src 'self' ${sentryDomain};
     `
 
