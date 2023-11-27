@@ -13,9 +13,22 @@ export const clusterSchema = z.object({
     // managedFields: edition history
   }),
   spec: z.object({
-    //   s3 info
-    //   storage size
-    //   postgresqlParams
+    backup: z.optional(
+      z.object({
+        barmanObjectStore: z.optional(
+          z.object({
+            destinationPath: z.string(),
+            endpointURL: z.string(),
+            s3Credentials: z.object({
+              accessKeyId: z.object({ key: z.string(), name: z.string() }),
+              secretAccessKey: z.object({ key: z.string(), name: z.string() }),
+              region: z.object({ key: z.string(), name: z.string() }),
+            }),
+          })
+        ),
+      })
+    ),
+    // postgresqlParams
     resources: z.optional(
       z.object({
         limits: z.optional(
@@ -99,7 +112,15 @@ export type Cluster = RawCluster & {
     cpu: string
     memory: string
   }
+  dumps: Array<DumpFile>
 }
+
+export type DumpFile = {
+  name: string | undefined
+  size: number | undefined
+  lastModified: Date
+}
+
 export type Namespace = {
   name: string
   clusters: Cluster[]

@@ -10,8 +10,11 @@ import {
   Namespace,
   clusterSchema,
   RawCluster,
+  Cluster,
   eventSchema,
+  DumpFile,
 } from "@/lib/kube/types"
+import { grepS3BucketFiles } from "@/lib/s3"
 
 type CachedData<T> = {
   data: T
@@ -28,7 +31,7 @@ export const getCachedNamespaces = unstable_cache(
     return makeCachedData(await getNamespaces(kubeContext))
   },
   ["namespaces"],
-  { revalidate: 60 * 5 }
+  { revalidate: 10 } //60 * 5 }
 )
 
 async function getNamespaces({
@@ -43,20 +46,21 @@ async function getNamespaces({
     const getClustersSchema = z.object({
       items: z.array(clusterSchema),
     })
-    const clusters = getClustersSchema.parse(JSON.parse(stdout)).items
+    const rawClusters = getClustersSchema.parse(JSON.parse(stdout)).items
 
-    const clustersWithStats = await pMap(clusters, async (cluster) => {
-      const [storageStats, podStats] = await Promise.all([
+    const clusters: Cluster[] = await pMap(rawClusters, async (cluster) => {
+      const [storageStats, podStats, dumps] = await Promise.all([
         getCnpgStorageStats({
           kubeContext,
           cluster,
         }),
         getCnpgPodStats({ kubeContext, cluster }),
+        getCnpgDumps({ kubeContext, cluster }),
       ])
-      return { ...cluster, storageStats, podStats }
+      return { ...cluster, storageStats, podStats, dumps }
     })
 
-    const namespaces = _.chain(clustersWithStats)
+    const namespaces = _.chain(clusters)
       .groupBy((cluster) => cluster.metadata.namespace)
       .map((clusters, namespaceName) => {
         return { name: namespaceName, clusters }
@@ -138,6 +142,76 @@ async function getCnpgPodStats({
   return { cpu, memory }
 }
 
+async function getCnpgDumps({
+  kubeContext,
+  cluster,
+}: {
+  kubeContext: string
+  cluster: RawCluster
+}): Promise<Array<DumpFile>> {
+  if (!cluster.spec.backup || !cluster.spec.backup.barmanObjectStore) {
+    return []
+  }
+
+  const s3Credentials = cluster.spec.backup?.barmanObjectStore?.s3Credentials
+  const config = { kubeContext, namespace: cluster.metadata.namespace }
+
+  const accessKeyIdPromise = getSecretValue({
+    ...config,
+    secretName: s3Credentials?.accessKeyId.name,
+    secretKey: s3Credentials?.accessKeyId.key,
+  })
+  const secretAccessKeyPromise = getSecretValue({
+    ...config,
+    secretName: s3Credentials?.secretAccessKey.name,
+    secretKey: s3Credentials?.secretAccessKey.key,
+  })
+  const regionPromise = getSecretValue({
+    ...config,
+    secretName: s3Credentials?.region.name,
+    secretKey: s3Credentials?.region.key,
+  })
+
+  const [accessKeyId, secretAccessKey, region] = await Promise.all([
+    accessKeyIdPromise,
+    secretAccessKeyPromise,
+    regionPromise,
+  ])
+
+  const [_s3, _empty, bucketName, prefix] =
+    cluster.spec.backup?.barmanObjectStore?.destinationPath.split("/")
+
+  return grepS3BucketFiles({
+    accessKeyId,
+    secretAccessKey,
+    region,
+    endpoint: cluster.spec.backup?.barmanObjectStore?.endpointURL,
+    bucketName: bucketName,
+    prefix: `${prefix}/${cluster.metadata.name}/dumps`,
+    searchString: ".psql.gz",
+  })
+}
+
+async function getSecretValue({
+  kubeContext,
+  namespace,
+  secretName,
+  secretKey,
+}: {
+  kubeContext: string
+  namespace: string
+  secretName: string
+  secretKey: string
+}) {
+  const { stdout } =
+    await $`kubectl get --context=${kubeContext} --namespace ${namespace} secret ${secretName} -o json`
+
+  const data = JSON.parse(stdout).data[secretKey]
+  const buff = Buffer.from(data, "base64")
+  return buff.toString("utf-8")
+}
+//-------- CNPG cluster phases
+//
 // // PhaseSwitchover when a cluster is changing the primary node
 // PhaseSwitchover = "Switchover in progress"
 //
