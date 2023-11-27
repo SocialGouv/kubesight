@@ -1917,17 +1917,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/async@npm:^3":
-  version: 3.2.23
-  resolution: "@types/async@npm:3.2.23"
-  checksum: 0c1da26927bd2a670230bbb42c680d652f3ed90ab8299b77a5f9bb303da9c777fa1b7e21f731622961924db607fac9e7257b46954354cea9afb68e4252afe5c0
-  languageName: node
-  linkType: hard
-
 "@types/estree@npm:*, @types/estree@npm:^1.0.0":
   version: 1.0.5
   resolution: "@types/estree@npm:1.0.5"
   checksum: b3b0e334288ddb407c7b3357ca67dbee75ee22db242ca7c56fe27db4e1a31989cb8af48a84dd401deb787fe10cc6b2ab1ee82dc4783be87ededbe3d53c79c70d
+  languageName: node
+  linkType: hard
+
+"@types/is-ci@npm:^3":
+  version: 3.0.4
+  resolution: "@types/is-ci@npm:3.0.4"
+  dependencies:
+    ci-info: "npm:^3.1.0"
+  checksum: 80a3d444d06af53b32429ef9e70184adf12bd98a2f851d8c050aecf7b4abfdab9671abc317785be834d41cad98331992040147ef382bacc2b2a441fee1549a3e
   languageName: node
   linkType: hard
 
@@ -2607,6 +2609,13 @@ __metadata:
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
   checksum: 594754e1303672171cc04e50f6c398ae16128eb134a88f801bf5354fd96f205320f23536a045d9abd8b51024a149696e51231565891d4efdab8846021ecf88e6
+  languageName: node
+  linkType: hard
+
+"ci-info@npm:^3.1.0, ci-info@npm:^3.2.0":
+  version: 3.9.0
+  resolution: "ci-info@npm:3.9.0"
+  checksum: 6f0109e36e111684291d46123d491bc4e7b7a1934c3a20dea28cba89f1d4a03acd892f5f6a81ed3855c38647e285a150e3c9ba062e38943bef57fee6c1554c3a
   languageName: node
   linkType: hard
 
@@ -4169,6 +4178,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-ci@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "is-ci@npm:3.0.1"
+  dependencies:
+    ci-info: "npm:^3.2.0"
+  bin:
+    is-ci: bin.js
+  checksum: 0e81caa62f4520d4088a5bef6d6337d773828a88610346c4b1119fb50c842587ed8bef1e5d9a656835a599e7209405b5761ddf2339668f2d0f4e889a92fe6051
+  languageName: node
+  linkType: hard
+
 "is-core-module@npm:^2.11.0, is-core-module@npm:^2.13.0, is-core-module@npm:^2.13.1":
   version: 2.13.1
   resolution: "is-core-module@npm:2.13.1"
@@ -4560,7 +4580,7 @@ __metadata:
     "@heroicons/react": "npm:^2.0.18"
     "@material-tailwind/react": "npm:^2.1.4"
     "@sentry/nextjs": "npm:^7.82.0"
-    "@types/async": "npm:^3"
+    "@types/is-ci": "npm:^3"
     "@types/lodash": "npm:^4"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
@@ -4571,6 +4591,7 @@ __metadata:
     eslint-config-next: "npm:14.0.3"
     execa: "npm:^8.0.1"
     husky: "npm:^8.0.3"
+    is-ci: "npm:^3.0.1"
     lodash: "npm:^4.17.21"
     next: "npm:14.0.3"
     node-talisman: "npm:^1.29.10"

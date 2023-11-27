@@ -41,7 +41,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/async": "^3",
+    "@types/is-ci": "^3",
     "@types/lodash": "^4",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -50,6 +50,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
     "husky": "^8.0.3",
+    "is-ci": "^3.0.1",
     "node-talisman": "^1.29.10",
     "pino-pretty": "^10.2.3",
     "postcss": "^8",
