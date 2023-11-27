@@ -24,6 +24,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs && \
   adduser --system --uid 1001 nextjs
 
+COPY entrypoint.sh .
+
 # You only need to copy next.config.js if you are NOT using the default configuration
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
@@ -36,4 +38,4 @@ USER 1001
 EXPOSE 3000
 ENV PORT 3000
 
-CMD ["node", "server.js
+ENTRYPOINT ["./entrypoint.sh"]
