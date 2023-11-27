@@ -1,6 +1,8 @@
 app:
   ~needs: [build-app]
   probesPath: /healthz
+  ingress:
+    enabled: false
 
 jobs:
   runs:
