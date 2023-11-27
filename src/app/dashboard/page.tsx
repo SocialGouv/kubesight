@@ -3,6 +3,8 @@ import MyBreadcrumbs from "@/components/breadcrumbs"
 
 import { getContexts } from "@/lib/kube"
 
+export const dynamic = "force-dynamic"
+
 export default async function Page() {
   const kubeContexts = await getContexts()
   return (
