@@ -1,5 +1,12 @@
-FROM node:20-alpine as base
-RUN apk add --no-cache libc6-compat
+FROM node:20-alpine@sha256:5ffaaf1eed5668f16f2d59130993b6b4e91263ea73d7556e44faa341d7d1c78a as base
+RUN apk add --no-cache libc6-compat curl
+
+# renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+ARG KUBECTL_VERSION=1.27.1
+ENV KUBECTL_VERSION=$KUBECTL_VERSION
+RUN curl --fail -sL https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl > /usr/local/bin/kubectl \
+  && chmod +x /usr/local/bin/kubectl
+
 WORKDIR /app
 
 # Rebuild the source code only when needed

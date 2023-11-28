@@ -11,6 +11,8 @@ fileignoreconfig:
   checksum: 763ac6ec97b686b6522508c1b3ad0728ab022e116a46664289e101bfb0877c98
 - filename: .github/workflows/review.yaml
   checksum: 8c4381d28ca109a4119fe7d8055f1179672fb1bb5bfb9fbceb116259662becfe
+- filename: Dockerfile
+  checksum: f8de366aab85679cb7dde1cc028b98b16301da2ae4d25f3743f70bcc7fc307ab
 - filename: next.config.js
   checksum: 5204c66ad2ecbce89abaab9e7505590f1c2ac717975ed5d991cad2000fc9f958
 - filename: yarn.lock
