@@ -5,6 +5,7 @@ on:
     branches:
       - "master"
       - "main"
+      - "feat/**"
 
 concurrency:
   cancel-in-progress: true
