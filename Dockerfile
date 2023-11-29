@@ -1,5 +1,12 @@
-FROM node:20-alpine as base
-RUN apk add --no-cache libc6-compat
+FROM node:20-alpine@sha256:5ffaaf1eed5668f16f2d59130993b6b4e91263ea73d7556e44faa341d7d1c78a as base
+RUN apk add --no-cache libc6-compat curl
+
+# renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+ARG KUBECTL_VERSION=1.27.1
+ENV KUBECTL_VERSION=$KUBECTL_VERSION
+RUN curl --fail -sL https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl > /usr/local/bin/kubectl \
+  && chmod +x /usr/local/bin/kubectl
+
 WORKDIR /app
 
 # Rebuild the source code only when needed
@@ -24,6 +31,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs && \
   adduser --system --uid 1001 nextjs
 
+COPY entrypoint.sh .
+
 # You only need to copy next.config.js if you are NOT using the default configuration
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
@@ -35,5 +44,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER 1001
 EXPOSE 3000
 ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js
+ENTRYPOINT ["./entrypoint.sh"]
