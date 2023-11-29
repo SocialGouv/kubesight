@@ -4,17 +4,10 @@ import Namespace from "@/components/namespace"
 import { getCachedNamespaces } from "@/lib/kube"
 import { Suspense } from "react"
 
-export default async function Page({
-  params,
-}: {
-  params: { slugs: string[] }
-}) {
-  let [kubeContext] = params?.slugs
-  kubeContext = kubeContext ?? "prod"
-
+export default async function Page() {
   return (
     <div>
-      <MyBreadcrumbs kubeContext={kubeContext}></MyBreadcrumbs>
+      <MyBreadcrumbs />
       <Suspense
         fallback={
           <div className="w-full flex justify-center py-32">
@@ -22,14 +15,14 @@ export default async function Page({
           </div>
         }
       >
-        <Dashboard kubeContext={kubeContext}></Dashboard>
+        <Dashboard />
       </Suspense>
     </div>
   )
 }
 
-async function Dashboard({ kubeContext }: { kubeContext: string }) {
-  const namespaces = await getCachedNamespaces({ kubeContext })
+async function Dashboard() {
+  const namespaces = await getCachedNamespaces()
   return (
     <>
       <div className="flex flex-col justify-center h-full mx-8 mt-2">
@@ -39,7 +32,7 @@ async function Dashboard({ kubeContext }: { kubeContext: string }) {
       </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-8">
         {namespaces.data.map((ns) => (
-          <Namespace key={ns.name} namespace={ns}></Namespace>
+          <Namespace key={ns.name} namespace={ns} />
         ))}
       </div>
     </>

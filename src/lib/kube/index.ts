@@ -26,22 +26,18 @@ function makeCachedData<T>(data: T): CachedData<T> {
 }
 
 export const getCachedNamespaces = unstable_cache(
-  async (kubeContext) => {
+  async () => {
     console.log("-- refreshing data")
-    return makeCachedData(await getNamespaces(kubeContext))
+    return makeCachedData(await getNamespaces())
   },
   ["namespaces"],
   { revalidate: 10 } //60 * 5 }
 )
 
-async function getNamespaces({
-  kubeContext,
-}: {
-  kubeContext: string
-}): Promise<Array<Namespace>> {
+async function getNamespaces(): Promise<Array<Namespace>> {
   try {
     const { stdout } =
-      await $`kubectl get --context=${kubeContext} clusters.postgresql.cnpg.io -A -o json`
+      await $`kubectl get clusters.postgresql.cnpg.io -A -o json`
 
     const getClustersSchema = z.object({
       items: z.array(clusterSchema),
@@ -51,11 +47,10 @@ async function getNamespaces({
     const clusters: Cluster[] = await pMap(rawClusters, async (cluster) => {
       const [storageStats, podStats, dumps] = await Promise.all([
         getCnpgStorageStats({
-          kubeContext,
           cluster,
         }),
-        getCnpgPodStats({ kubeContext, cluster }),
-        getCnpgDumps({ kubeContext, cluster }),
+        getCnpgPodStats({ cluster }),
+        getCnpgDumps({ cluster }),
       ])
       return { ...cluster, storageStats, podStats, dumps }
     })
@@ -70,7 +65,7 @@ async function getNamespaces({
     const namespacesWithEvents = await pMap(namespaces, async (namespace) => {
       return {
         ...namespace,
-        events: await getEvents({ kubeContext, namespace: namespace.name }),
+        events: await getEvents({ namespace: namespace.name }),
       }
     })
 
@@ -86,15 +81,9 @@ export async function getContexts() {
   return stdout.split("\n")
 }
 
-async function getEvents({
-  kubeContext,
-  namespace,
-}: {
-  kubeContext: string
-  namespace: string
-}) {
+async function getEvents({ namespace }: { namespace: string }) {
   const { stdout } =
-    await $`kubectl --context=${kubeContext} get --namespace ${namespace} events -o json`
+    await $`kubectl  get --namespace ${namespace} events -o json`
   const getEventsSchema = z.object({
     items: z.array(eventSchema),
   })
@@ -102,15 +91,9 @@ async function getEvents({
   return events
 }
 
-async function getCnpgStorageStats({
-  kubeContext,
-  cluster,
-}: {
-  kubeContext: string
-  cluster: RawCluster
-}) {
+async function getCnpgStorageStats({ cluster }: { cluster: RawCluster }) {
   const { stdout } =
-    await $`kubectl exec --context=${kubeContext} --namespace ${cluster.metadata.namespace} ${cluster.status.currentPrimary} -- df -h`
+    await $`kubectl exec  --namespace ${cluster.metadata.namespace} ${cluster.status.currentPrimary} -- df -h`
 
   const postgresLine = _.chain(stdout)
     .split("\n")
@@ -128,25 +111,17 @@ async function getCnpgStorageStats({
   return { total, used, percentUsed }
 }
 
-async function getCnpgPodStats({
-  kubeContext,
-  cluster,
-}: {
-  kubeContext: string
-  cluster: RawCluster
-}) {
+async function getCnpgPodStats({ cluster }: { cluster: RawCluster }) {
   const { stdout } =
-    await $`kubectl top --context=${kubeContext} --namespace ${cluster.metadata.namespace} --no-headers=true pod ${cluster.status.currentPrimary}`
+    await $`kubectl top  --namespace ${cluster.metadata.namespace} --no-headers=true pod ${cluster.status.currentPrimary}`
   const [_pod, cpu, memory] = stdout.split(/\s+/)
 
   return { cpu, memory }
 }
 
 async function getCnpgDumps({
-  kubeContext,
   cluster,
 }: {
-  kubeContext: string
   cluster: RawCluster
 }): Promise<Array<DumpFile>> {
   if (!cluster.spec.backup || !cluster.spec.backup.barmanObjectStore) {
@@ -154,7 +129,7 @@ async function getCnpgDumps({
   }
 
   const s3Credentials = cluster.spec.backup?.barmanObjectStore?.s3Credentials
-  const config = { kubeContext, namespace: cluster.metadata.namespace }
+  const config = { namespace: cluster.metadata.namespace }
 
   const accessKeyIdPromise = getSecretValue({
     ...config,
@@ -193,18 +168,16 @@ async function getCnpgDumps({
 }
 
 async function getSecretValue({
-  kubeContext,
   namespace,
   secretName,
   secretKey,
 }: {
-  kubeContext: string
   namespace: string
   secretName: string
   secretKey: string
 }) {
   const { stdout } =
-    await $`kubectl get --context=${kubeContext} --namespace ${namespace} secret ${secretName} -o json`
+    await $`kubectl get --namespace ${namespace} secret ${secretName} -o json`
 
   const data = JSON.parse(stdout).data[secretKey]
   const buff = Buffer.from(data, "base64")
