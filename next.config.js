@@ -30,7 +30,7 @@ const ContentSecurityPolicy =
       base-uri 'none';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: authjs.dev;
-      script-src 'self' 'unsafe-eval';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
       connect-src 'self' ${sentryDomain};
     `
 
@@ -43,10 +43,10 @@ const securityHeaders = [
     key: "X-Content-Type-Options",
     value: "nosniff",
   },
-  {
-    key: "Content-Security-Policy",
-    value: ContentSecurityPolicy.replace(/\s{2,}/g, " ").trim(),
-  },
+  // {
+  //   key: "Content-Security-Policy",
+  //   value: ContentSecurityPolicy.replace(/\s{2,}/g, " ").trim(),
+  // },
 ]
 
 module.exports = {
