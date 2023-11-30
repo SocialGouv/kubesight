@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: .github/workflows/build-docker-image.yml
+  checksum: f3413f12605037fcf97ccaf1991db723758223f5554f9cea2e84689944f80f17
 - filename: .github/workflows/deactivate.yaml
   checksum: e0f0138068d1f9a11721ad38ff8b892f8dfbf19854f741fe60ae1d7f291fff22
 - filename: .github/workflows/preproduction.yaml
