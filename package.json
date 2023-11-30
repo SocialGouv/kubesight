@@ -9,7 +9,7 @@
   "repository": "git@github.com:SocialGouv/kubesight.git",
   "author": "Incubateur des Ministères Sociaux <dsi-incubateur@sg.social.gouv.fr> (https://incubateur.social.gouv.fr)",
   "bugs": "https://github.com/SocialGouv/kubesight/issues",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "scripts": {
     "dev": "FORCE_COLOR=true next dev | pino-pretty",
     "build": "next build",
