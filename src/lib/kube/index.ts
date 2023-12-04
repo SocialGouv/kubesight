@@ -16,7 +16,7 @@ import {
 } from "@/lib/kube/types"
 import { grepS3BucketFiles } from "@/lib/s3"
 
-type CachedData<T> = {
+export type CachedData<T> = {
   data: T
   lastRefresh: Date
 }

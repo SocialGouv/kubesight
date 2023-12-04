@@ -16,7 +16,7 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
   const clusterIsReady = isReady(cluster)
   return (
     <div
-      className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
+      className={`rounded border border-l-8
       ${clusterIsReady ? "border-emerald-400" : "border-red-500"}
     `}
     >

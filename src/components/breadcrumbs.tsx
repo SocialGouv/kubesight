@@ -16,7 +16,7 @@ export default function MyBreadcrumbs({
             </a>
           </div>
         </li>
-        {kubeContext ? (
+        {kubeContext && (
           <li>
             <div className="flex items-center">
               <svg
@@ -32,8 +32,6 @@ export default function MyBreadcrumbs({
               </span>
             </div>
           </li>
-        ) : (
-          <></>
         )}
       </ol>
     </nav>

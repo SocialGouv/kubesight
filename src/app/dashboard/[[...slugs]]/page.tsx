@@ -3,10 +3,14 @@ import MyBreadcrumbs from "@/components/breadcrumbs"
 import Namespace from "@/components/namespace"
 import { getCachedNamespaces } from "@/lib/kube"
 import { Suspense } from "react"
+import Namespaces from "@/components/dashboard"
+import Dashboard from "@/components/dashboard"
 
 export default async function Page() {
+  const namespaces = await getCachedNamespaces()
+
   return (
-    <div>
+    <>
       <MyBreadcrumbs />
       <Suspense
         fallback={
@@ -15,27 +19,24 @@ export default async function Page() {
           </div>
         }
       >
-        <Dashboard />
+        <LastRefresh date={namespaces.lastRefresh} />
+        <Dashboard namespaces={namespaces} />
       </Suspense>
-    </div>
+    </>
   )
 }
 
-async function Dashboard() {
-  const namespaces = await getCachedNamespaces()
+function LastRefresh({date}: {date: Date}) {
+  const toto = dayjs(date)
+  console.log("DASHBOARD", date, toto, toto.fromNow); // WTF: "fromNow" is undefined in the console
+
   return (
-    <>
-      <div className="flex flex-col justify-center h-full mx-8 mt-2">
-        <span className="text-xs text-gray-500 text-left">
-          Last refreshed: {dayjs(namespaces.lastRefresh).fromNow()}
-        </span>
-      </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-8">
-        {namespaces.data.map((ns) => (
-          <Namespace key={ns.name} namespace={ns} />
-        ))}
-      </div>
-    </>
+    <div className="flex flex-col justify-center px-3 pt-3">
+      <span className="text-xs text-gray-500">
+        {/* Last refreshed: {dayjs(namespaces.lastRefresh).fromNow()} */}
+        Last refresh: ...
+      </span>
+    </div>
   )
 }
 

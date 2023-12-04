@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  @apply h-full;
+}
+
 body {
-  background-color: #dee6eb;
+  @apply flex flex-col bg-gray-200;
 }

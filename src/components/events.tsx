@@ -8,7 +8,7 @@ dayjs.extend(relativeTime)
 
 export default function Events({ namespace }: { namespace: Namespace }) {
   return (
-    <ul className="list-disc text-left text-xs">
+    <ul className="flex flex-col gap-1 text-xs">
       {namespace.events
         .filter((event) => event.type !== "Normal")
         .filter((event) =>
@@ -26,18 +26,14 @@ export default function Events({ namespace }: { namespace: Namespace }) {
               </>
             }
           >
-            <li className="w-full">
-              {event.count && event.count > 1 ? (
-                <Badge
-                  text={event.count?.toString() ?? "0"}
-                  status="warning"
-                ></Badge>
-              ) : (
-                <></>
-              )}{" "}
-              {event.message.length > 40
-                ? event.message.substring(0, 40) + "..."
-                : event.message}
+            <li className="flex items-center gap-1">
+              <Badge
+                text={event.count?.toString() ?? "0"}
+                status="warning"
+              ></Badge>
+              <div className="truncate">
+                {event.message}
+              </div>
             </li>
           </Tooltip>
         ))}
