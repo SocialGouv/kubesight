@@ -26,9 +26,9 @@ export default async function Page() {
   )
 }
 
-function LastRefresh({date}: {date: Date}) {
+function LastRefresh({ date }: { date: Date }) {
   const toto = dayjs(date)
-  console.log("DASHBOARD", date, toto, toto.fromNow); // WTF: "fromNow" is undefined in the console
+  console.log("DASHBOARD", date, toto, toto.fromNow) // WTF: "fromNow" is undefined in the console
 
   return (
     <div className="flex flex-col justify-center px-3 pt-3">

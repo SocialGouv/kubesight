@@ -31,9 +31,7 @@ export default function Events({ namespace }: { namespace: Namespace }) {
                 text={event.count?.toString() ?? "0"}
                 status="warning"
               ></Badge>
-              <div className="truncate">
-                {event.message}
-              </div>
+              <div className="truncate">{event.message}</div>
             </li>
           </Tooltip>
         ))}

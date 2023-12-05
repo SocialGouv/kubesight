@@ -18,7 +18,7 @@ fileignoreconfig:
 - filename: next.config.js
   checksum: 5204c66ad2ecbce89abaab9e7505590f1c2ac717975ed5d991cad2000fc9f958
 - filename: src/components/dashboard.tsx
-  checksum: 9210dfb69170c61efa3e97c3108c7a4c5098003920920ba8c9bb30a5fe864d67
+  checksum: 0e4f8bab53b6629320455304bdd379be8706e6de5c21774beec5efe86a2c19db
 - filename: src/components/namespace.tsx
   checksum: e33a02343607b39cc7bd4a76f281ffee0680319846957258a4c89043127761e5
 - filename: yarn.lock
