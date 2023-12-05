@@ -1,8 +1,8 @@
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 
-import { Namespace } from "@/lib/kube/types"
 import Events from "@/components/events"
+import { Namespace } from "@/lib/kube/types"
 import ClusterWidget from "@/components/cnpgCluster"
 
 dayjs.extend(relativeTime)
@@ -10,9 +10,11 @@ dayjs.extend(relativeTime)
 export default function Namespace({
   namespace,
   selected,
+  layout,
 }: {
   namespace: Namespace
   selected: boolean
+  layout: "compact" | "detailed"
 }) {
   return (
     <div
@@ -20,12 +22,12 @@ export default function Namespace({
     >
       <div
         className={`flex items-center justify-center text-center ${
-          selected ? "" : "flex-1"
+          selected || layout === "detailed" ? "" : "flex-1"
         }`}
       >
         {namespace.name}
       </div>
-      {selected && (
+      {(selected || layout === "detailed") && (
         <>
           <div className="flex-1 flex flex-col gap-3">
             {namespace.clusters.map((cluster) => (
