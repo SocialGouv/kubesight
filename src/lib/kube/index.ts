@@ -76,14 +76,9 @@ async function getNamespaces(): Promise<Array<Namespace>> {
   }
 }
 
-export async function getContexts() {
-  const { stdout } = await $`kubectl config get-contexts -o name`
-  return stdout.split("\n")
-}
-
 async function getEvents({ namespace }: { namespace: string }) {
   const { stdout } =
-    await $`kubectl  get --namespace ${namespace} events -o json`
+    await $`kubectl get --namespace ${namespace} events -o json`
   const getEventsSchema = z.object({
     items: z.array(eventSchema),
   })
@@ -93,7 +88,7 @@ async function getEvents({ namespace }: { namespace: string }) {
 
 async function getCnpgStorageStats({ cluster }: { cluster: RawCluster }) {
   const { stdout } =
-    await $`kubectl exec  --namespace ${cluster.metadata.namespace} ${cluster.status.currentPrimary} -- df -h`
+    await $`kubectl exec --namespace ${cluster.metadata.namespace} ${cluster.status.currentPrimary} -- df -h`
 
   const postgresLine = _.chain(stdout)
     .split("\n")
@@ -113,7 +108,7 @@ async function getCnpgStorageStats({ cluster }: { cluster: RawCluster }) {
 
 async function getCnpgPodStats({ cluster }: { cluster: RawCluster }) {
   const { stdout } =
-    await $`kubectl top  --namespace ${cluster.metadata.namespace} --no-headers=true pod ${cluster.status.currentPrimary}`
+    await $`kubectl top --namespace ${cluster.metadata.namespace} --no-headers=true pod ${cluster.status.currentPrimary}`
   const [_pod, cpu, memory] = stdout.split(/\s+/)
 
   return { cpu, memory }
