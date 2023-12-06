@@ -1,4 +1,4 @@
-FROM node:20-alpine@sha256:5ffaaf1eed5668f16f2d59130993b6b4e91263ea73d7556e44faa341d7d1c78a as base
+FROM node:20-alpine@sha256:d016f19a31ac259d78dc870b4c78132cf9e52e89339ff319bdd9999912818f4a as base
 RUN apk add --no-cache libc6-compat curl
 
 # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
