@@ -51,6 +51,8 @@
     "commit-and-tag-version": "^12.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",
     "is-ci": "^3.0.1",
     "node-talisman": "^1.29.10",
