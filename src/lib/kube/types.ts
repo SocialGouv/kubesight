@@ -91,16 +91,149 @@ export const eventSchema = z.object({
   // eventTime ??
   firstTimestamp: z.coerce.date(),
   lastTimestamp: z.coerce.date(),
-  involvedObject: z.object({
-    kind: z.string(),
-    name: z.string(),
-    namespace: z.string(),
-  }),
+  involvedObject: z.optional(
+    z.object({
+      kind: z.string(),
+      name: z.string(),
+      namespace: z.optional(z.string()),
+    })
+  ),
   message: z.string(),
   reason: z.string(),
   type: z.string(),
 })
 export type RawEvent = z.infer<typeof eventSchema>
+
+export const podSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string(),
+    creationTimestamp: z.coerce.date(),
+    ownerReferences: z.array(
+      z.object({
+        kind: z.string(),
+        name: z.string(),
+      })
+    ),
+  }),
+  spec: z.object({
+    nodeName: z.string(),
+  }),
+  status: z.object({
+    conditions: z.array(
+      z.object({
+        type: z.string(),
+        status: z.coerce.boolean(),
+        lastTransitionTime: z.coerce.date(),
+      })
+    ),
+    containerStatuses: z.array(
+      z.object({
+        image: z.string(),
+        name: z.string(),
+        ready: z.boolean(),
+        restartCount: z.number(),
+        started: z.boolean(),
+        state: z.object({
+          running: z.optional(z.object({ startedAt: z.coerce.date() })),
+        }),
+      })
+    ),
+    phase: z.string(),
+  }),
+})
+export type RawPod = z.infer<typeof podSchema>
+
+export const replicasetSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string(),
+    creationTimestamp: z.coerce.date(),
+    ownerReferences: z.array(
+      z.object({
+        kind: z.string(),
+        name: z.string(),
+      })
+    ),
+  }),
+  spec: z.object({
+    replicas: z.number(),
+  }),
+  status: z.object({
+    availableReplicas: z.optional(z.number()),
+    readyReplicas: z.optional(z.number()),
+    replicas: z.number(),
+  }),
+})
+export type RawReplicaSet = z.infer<typeof replicasetSchema>
+
+export const deploymentSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string(),
+    creationTimestamp: z.coerce.date(),
+  }),
+  status: z.object({
+    availableReplicas: z.optional(z.number()),
+    readyReplicas: z.optional(z.number()),
+    replicas: z.optional(z.number()),
+    updatedReplicas: z.optional(z.number()),
+    conditions: z.array(
+      z.object({
+        type: z.string(),
+        status: z.coerce.boolean(),
+        lastTransitionTime: z.coerce.date(),
+        lastUpdateTime: z.coerce.date(),
+        reason: z.string(),
+        message: z.string(),
+      })
+    ),
+  }),
+})
+export type RawDeployment = z.infer<typeof deploymentSchema>
+
+export const jobSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string(),
+    creationTimestamp: z.coerce.date(),
+    ownerReferences: z.array(
+      z.object({
+        kind: z.string(),
+        name: z.string(),
+      })
+    ),
+  }),
+  status: z.object({
+    startTime: z.coerce.date(),
+    completionTime: z.optional(z.coerce.date()),
+    ready: z.number(),
+    succeeded: z.optional(z.number()),
+    conditions: z.optional(
+      z.array(
+        z.object({
+          type: z.string(),
+          status: z.coerce.boolean(),
+          lastTransitionTime: z.coerce.date(),
+        })
+      )
+    ),
+  }),
+})
+export type RawJob = z.infer<typeof jobSchema>
+
+export const cronjobSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string(),
+    creationTimestamp: z.coerce.date(),
+  }),
+  status: z.object({
+    lastScheduleTime: z.coerce.date(),
+    lastSuccessfulTime: z.coerce.date(),
+  }),
+})
+export type RawCronjob = z.infer<typeof cronjobSchema>
 
 export type Cluster = RawCluster & {
   storageStats: {
@@ -125,6 +258,11 @@ export type Namespace = {
   name: string
   clusters: Cluster[]
   events: RawEvent[]
+  pods: RawPod[]
+  replicasets: RawReplicaSet[]
+  deployments: RawDeployment[]
+  jobs: RawJob[]
+  cronjobs: RawCronjob[]
 }
 
 export function isReady(cluster: Cluster): boolean {

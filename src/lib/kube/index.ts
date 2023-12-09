@@ -2,7 +2,7 @@ import "server-only"
 
 import _ from "lodash"
 import { $ } from "execa"
-import { z } from "zod"
+import { z, ZodTypeAny } from "zod"
 import pMap from "p-map"
 import { unstable_cache } from "next/cache"
 
@@ -13,6 +13,17 @@ import {
   Cluster,
   eventSchema,
   DumpFile,
+  podSchema,
+  replicasetSchema,
+  deploymentSchema,
+  jobSchema,
+  cronjobSchema,
+  RawPod,
+  RawReplicaSet,
+  RawDeployment,
+  RawJob,
+  RawCronjob,
+  RawEvent,
 } from "@/lib/kube/types"
 import { grepS3BucketFiles } from "@/lib/s3"
 
@@ -28,13 +39,118 @@ function makeCachedData<T>(data: T): CachedData<T> {
 export const getCachedNamespaces = unstable_cache(
   async () => {
     console.log("-- refreshing data")
-    return makeCachedData(await getNamespaces())
+    const cachedNamespaces = makeCachedData(await getNamespaces())
+    console.log("     ok")
+    return cachedNamespaces
   },
   ["namespaces"],
   { revalidate: 10 } //60 * 5 }
 )
 
+function getOrCreateNamespace(
+  namespaces: Record<string, Namespace>,
+  name: string
+) {
+  if (!(name in namespaces)) {
+    namespaces[name] = {
+      name,
+      clusters: [],
+      pods: [],
+      replicasets: [],
+      deployments: [],
+      jobs: [],
+      cronjobs: [],
+      events: [],
+    }
+  }
+}
+
 async function getNamespaces(): Promise<Array<Namespace>> {
+  try {
+    const [
+      pods,
+      replicasets,
+      deployments,
+      jobs,
+      cronjobs,
+      events,
+      cnpgClusters,
+    ] = await Promise.all([
+      getResourceList("pods", podSchema),
+      getResourceList("replicasets", replicasetSchema),
+      getResourceList("deployments", deploymentSchema),
+      getResourceList("jobs", jobSchema),
+      getResourceList("cronjobs", cronjobSchema),
+      getResourceList("events", eventSchema),
+      getCnpgClusters(),
+    ])
+
+    let namespaces: Record<string, Namespace> = {}
+
+    for (const { name, items } of pods) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].pods = items as RawPod[]
+    }
+    for (const { name, items } of replicasets) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].replicasets = items as RawReplicaSet[]
+    }
+    for (const { name, items } of deployments) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].deployments = items as RawDeployment[]
+    }
+    for (const { name, items } of jobs) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].jobs = items as RawJob[]
+    }
+    for (const { name, items } of cronjobs) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].cronjobs = items as RawCronjob[]
+    }
+    for (const { name, items } of events) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].events = items as RawEvent[]
+    }
+    for (const { name, items } of cnpgClusters) {
+      getOrCreateNamespace(namespaces, name)
+      namespaces[name].clusters = items as Cluster[]
+    }
+
+    return _.map(namespaces, (nsList) => {
+      return nsList
+    })
+  } catch (e) {
+    console.error(e)
+    return []
+  }
+}
+
+async function getResourceList<Resource, Schema extends ZodTypeAny>(
+  resourceName: string,
+  schema: Schema
+): Promise<Array<{ name: string; items: Array<Resource> }>> {
+  try {
+    const { stdout } = await $`kubectl get ${resourceName} -A -o json`
+    const getItemsSchema = z.object({ items: z.array(schema) })
+    const rawItems = getItemsSchema.parse(JSON.parse(stdout)).items
+
+    const itemsByNamespaces = _.chain(rawItems)
+      .groupBy((item) => item.metadata.namespace)
+      .map((items, namespaceName) => {
+        return { name: namespaceName, items: items }
+      })
+      .value()
+
+    return itemsByNamespaces
+  } catch (e) {
+    console.error(e)
+    return []
+  }
+}
+
+async function getCnpgClusters(): Promise<
+  Array<{ name: string; items: Cluster[] }>
+> {
   try {
     const { stdout } =
       await $`kubectl get clusters.postgresql.cnpg.io -A -o json`
@@ -55,35 +171,18 @@ async function getNamespaces(): Promise<Array<Namespace>> {
       return { ...cluster, storageStats, podStats, dumps }
     })
 
-    const namespaces = _.chain(clusters)
-      .groupBy((cluster) => cluster.metadata.namespace)
-      .map((clusters, namespaceName) => {
-        return { name: namespaceName, clusters }
+    const clustersByNamespaces = _.chain(clusters)
+      .groupBy((item) => item.metadata.namespace)
+      .map((items, namespaceName) => {
+        return { name: namespaceName, items: items }
       })
       .value()
 
-    const namespacesWithEvents = await pMap(namespaces, async (namespace) => {
-      return {
-        ...namespace,
-        events: await getEvents({ namespace: namespace.name }),
-      }
-    })
-
-    return namespacesWithEvents
+    return clustersByNamespaces
   } catch (e) {
     console.error(e)
     return []
   }
-}
-
-async function getEvents({ namespace }: { namespace: string }) {
-  const { stdout } =
-    await $`kubectl get --namespace ${namespace} events -o json`
-  const getEventsSchema = z.object({
-    items: z.array(eventSchema),
-  })
-  const events = getEventsSchema.parse(JSON.parse(stdout)).items
-  return events
 }
 
 async function getCnpgStorageStats({ cluster }: { cluster: RawCluster }) {
@@ -119,47 +218,49 @@ async function getCnpgDumps({
 }: {
   cluster: RawCluster
 }): Promise<Array<DumpFile>> {
-  if (!cluster.spec.backup || !cluster.spec.backup.barmanObjectStore) {
-    return []
-  }
+  return []
 
-  const s3Credentials = cluster.spec.backup?.barmanObjectStore?.s3Credentials
-  const config = { namespace: cluster.metadata.namespace }
-
-  const accessKeyIdPromise = getSecretValue({
-    ...config,
-    secretName: s3Credentials?.accessKeyId.name,
-    secretKey: s3Credentials?.accessKeyId.key,
-  })
-  const secretAccessKeyPromise = getSecretValue({
-    ...config,
-    secretName: s3Credentials?.secretAccessKey.name,
-    secretKey: s3Credentials?.secretAccessKey.key,
-  })
-  const regionPromise = getSecretValue({
-    ...config,
-    secretName: s3Credentials?.region.name,
-    secretKey: s3Credentials?.region.key,
-  })
-
-  const [accessKeyId, secretAccessKey, region] = await Promise.all([
-    accessKeyIdPromise,
-    secretAccessKeyPromise,
-    regionPromise,
-  ])
-
-  const [_s3, _empty, bucketName, prefix] =
-    cluster.spec.backup?.barmanObjectStore?.destinationPath.split("/")
-
-  return grepS3BucketFiles({
-    accessKeyId,
-    secretAccessKey,
-    region,
-    endpoint: cluster.spec.backup?.barmanObjectStore?.endpointURL,
-    bucketName: bucketName,
-    prefix: `${prefix}/${cluster.metadata.name}/dumps`,
-    searchString: ".psql.gz",
-  })
+  // if (!cluster.spec.backup || !cluster.spec.backup.barmanObjectStore) {
+  //   return []
+  // }
+  //
+  // const s3Credentials = cluster.spec.backup?.barmanObjectStore?.s3Credentials
+  // const config = { namespace: cluster.metadata.namespace }
+  //
+  // const accessKeyIdPromise = getSecretValue({
+  //   ...config,
+  //   secretName: s3Credentials?.accessKeyId.name,
+  //   secretKey: s3Credentials?.accessKeyId.key,
+  // })
+  // const secretAccessKeyPromise = getSecretValue({
+  //   ...config,
+  //   secretName: s3Credentials?.secretAccessKey.name,
+  //   secretKey: s3Credentials?.secretAccessKey.key,
+  // })
+  // const regionPromise = getSecretValue({
+  //   ...config,
+  //   secretName: s3Credentials?.region.name,
+  //   secretKey: s3Credentials?.region.key,
+  // })
+  //
+  // const [accessKeyId, secretAccessKey, region] = await Promise.all([
+  //   accessKeyIdPromise,
+  //   secretAccessKeyPromise,
+  //   regionPromise,
+  // ])
+  //
+  // const [_s3, _empty, bucketName, prefix] =
+  //   cluster.spec.backup?.barmanObjectStore?.destinationPath.split("/")
+  //
+  // return grepS3BucketFiles({
+  //   accessKeyId,
+  //   secretAccessKey,
+  //   region,
+  //   endpoint: cluster.spec.backup?.barmanObjectStore?.endpointURL,
+  //   bucketName: bucketName,
+  //   prefix: `${prefix}/${cluster.metadata.name}/dumps`,
+  //   searchString: ".psql.gz",
+  // })
 }
 
 async function getSecretValue({
