@@ -51,6 +51,8 @@ function Jobs({ cronjob }: { cronjob: Cronjob }) {
           .filter((job) => {
             return (
               job.raw.status.succeeded !== 1 &&
+              job.raw.status.completionTime &&
+              lastSuccess?.raw.status.completionTime &&
               job.raw.status.completionTime >
                 lastSuccess?.raw.status.completionTime
             )

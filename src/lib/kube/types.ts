@@ -1,5 +1,10 @@
 import { z } from "zod"
 
+export type CachedData<T> = {
+  data: T
+  lastRefresh: Date
+}
+
 export const clusterSchema = z.object({
   metadata: z.object({
     name: z.string(),

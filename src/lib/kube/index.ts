@@ -26,13 +26,11 @@ import {
   RawEvent,
   RawNamespace,
   KubeData,
+  CachedData,
+  Deployment,
+  Cronjob,
 } from "@/lib/kube/types"
 import { grepS3BucketFiles } from "@/lib/s3"
-
-type CachedData<T> = {
-  data: T
-  lastRefresh: Date
-}
 
 function makeCachedData<T>(data: T): CachedData<T> {
   return { data, lastRefresh: new Date() }
@@ -46,7 +44,7 @@ export const getCachedKubeData = unstable_cache(
     return cachedKubeData
   },
   ["kubeData"],
-  { revalidate: 60 * 10 }
+  { revalidate: 10 } // 60 * 10 }
 )
 
 function getOrCreateNamespace(
@@ -153,7 +151,7 @@ async function getKubeData(): Promise<KubeData> {
           const job = namespace.jobs.find((j) => j.metadata.name === jobName)
           const cronjob = namespace.cronjobs.find(
             (cronjob) =>
-              cronjob.metadata.name === job?.metadata?.ownerReferences[0].name
+              cronjob.metadata.name === job?.metadata?.ownerReferences?.[0].name
           )
           return { name: jobName, pods: jobPods, cronjob, raw: job }
         })
@@ -163,8 +161,9 @@ async function getKubeData(): Promise<KubeData> {
         })
         .value()
 
-      namespace.cleanedDeployments = cleanedDeployments
-      namespace.cleanedCronjobs = cleanedCronjobs
+      // TODO: fix type casts
+      namespace.cleanedDeployments = cleanedDeployments as Deployment[]
+      namespace.cleanedCronjobs = cleanedCronjobs as Cronjob[]
     }
 
     const data: Namespace[] = namespaceList.map((ns) => {

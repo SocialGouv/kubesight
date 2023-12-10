@@ -19,6 +19,7 @@ export default function Sidebar() {
       </div>
       <div className="p-2">
         <Input
+          crossOrigin=""
           icon={<MagnifyingGlassIcon className="h-5 w-5" />}
           label="Filter namespaces"
         />

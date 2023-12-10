@@ -23,6 +23,8 @@ fileignoreconfig:
   checksum: 68ad893626c4d340708f5e040cb32a44052e51af55b424a0c397d4bccb83e43a
 - filename: src/components/kube/namespace.tsx
   checksum: e16b0eb5015eec0eeae6f15450d129aa3bd81f9fac354fa43a518d013afb9839
+- filename: src/components/ui/dashboard.tsx
+  checksum: 6f6b1280043342678754a692cd0a51b0a2814f21591ec6d783b9c68746ce5830
 - filename: src/lib/kube/index.ts
   checksum: e1429245b03c6db38b043196a028a1cd2368417feef02b851fc1b653f98d7f6b
 - filename: yarn.lock
