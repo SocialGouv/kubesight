@@ -1,8 +1,8 @@
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Namespace } from "@/lib/kube/types"
-import Badge from "@/components/badge"
-import Tooltip from "@/components/tooltip"
+import Badge from "@/components/ui/badge"
+import Tooltip from "@/components/ui/tooltip"
 
 dayjs.extend(relativeTime)
 

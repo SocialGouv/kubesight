@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
-import MyBreadcrumbs from "@/components/breadcrumbs"
-import Namespace from "@/components/namespace"
+import MyBreadcrumbs from "@/components/ui/breadcrumbs"
+import Namespace from "@/components/kube/namespace"
 import { getCachedKubeData } from "@/lib/kube"
 import { Suspense } from "react"
 

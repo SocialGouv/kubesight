@@ -9,8 +9,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 
 import { isReady, Cluster, getInstances } from "@/lib/kube/types"
-import Badge from "@/components/badge"
-import Tooltip from "@/components/tooltip"
+import Badge from "@/components/ui/badge"
+import Tooltip from "@/components/ui/tooltip"
 
 export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
   const clusterIsReady = isReady(cluster)

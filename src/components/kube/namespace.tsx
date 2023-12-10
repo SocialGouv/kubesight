@@ -2,8 +2,8 @@ import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 
 import { Namespace } from "@/lib/kube/types"
-import Events from "@/components/events"
-import ClusterWidget from "@/components/cnpgCluster"
+import Events from "@/components/kube/events"
+import ClusterWidget from "@/components/kube/cnpgCluster"
 
 dayjs.extend(relativeTime)
 
