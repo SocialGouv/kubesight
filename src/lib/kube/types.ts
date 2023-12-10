@@ -269,11 +269,13 @@ export type Deployment = {
 
 export type Job = {
   name: string
+  raw: RawJob
   pods: RawPod[]
 }
 
 export type Cronjob = {
   name: string
+  raw: RawCronjob
   jobs: Job[]
 }
 

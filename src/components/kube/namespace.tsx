@@ -5,6 +5,7 @@ import { Namespace } from "@/lib/kube/types"
 import EventsWidget from "@/components/kube/events"
 import ClusterWidget from "@/components/kube/cnpgCluster"
 import DeploymentWidget from "@/components/kube/deployment"
+import CronjobWidget from "@/components/kube/cronjob"
 
 dayjs.extend(relativeTime)
 
@@ -15,6 +16,9 @@ export default function Namespace({ namespace }: { namespace: Namespace }) {
       <div className="grid grid-cols-1 gap-6 m-2">
         {namespace.deployments.map((deployment) => (
           <DeploymentWidget key={deployment.name} deployment={deployment} />
+        ))}
+        {namespace.cronjobs.map((cronjob) => (
+          <CronjobWidget key={cronjob.name} cronjob={cronjob} />
         ))}
         {namespace.clusters.map((cluster) => (
           <ClusterWidget key={cluster.metadata.name} cluster={cluster} />

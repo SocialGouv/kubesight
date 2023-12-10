@@ -39,6 +39,7 @@ function Meta({ cluster }: { cluster: Cluster }) {
     <div className="flex flex-row justify-between">
       <span className="font-bold">{cluster.metadata.name}</span>
       <span className="text-xs text-gray-500 text-right">
+        <div className="font-bold capitalize">CNPG CLUSTER</div>
         <div>{dayjs(cluster.metadata.creationTimestamp).fromNow()}</div>
         <div>{cluster.metadata.labels?.["helm.sh/chart"]}</div>
       </span>

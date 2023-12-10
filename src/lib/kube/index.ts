@@ -155,11 +155,11 @@ async function getKubeData(): Promise<KubeData> {
             (cronjob) =>
               cronjob.metadata.name === job?.metadata?.ownerReferences[0].name
           )
-          return { name: jobName, pods: jobPods, cronjob }
+          return { name: jobName, pods: jobPods, cronjob, raw: job }
         })
         .groupBy("cronjob.metadata.name")
         .map((cronJobs, cronjobName) => {
-          return { name: cronjobName, jobs: cronJobs }
+          return { name: cronjobName, jobs: cronJobs, raw: cronJobs[0].cronjob }
         })
         .value()
 

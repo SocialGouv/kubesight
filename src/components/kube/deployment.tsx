@@ -28,6 +28,7 @@ function Meta({ deployment }: { deployment: Deployment }) {
     <div className="flex flex-row justify-between">
       <span className="font-bold">{deployment.name}</span>
       <span className="text-xs text-gray-500 text-right">
+        <div className="font-bold capitalize">DEPLOY</div>
         <div>{dayjs(deployment.raw.metadata.creationTimestamp).fromNow()}</div>
       </span>
     </div>
