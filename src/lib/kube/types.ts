@@ -109,11 +109,13 @@ export const podSchema = z.object({
     name: z.string(),
     namespace: z.string(),
     creationTimestamp: z.coerce.date(),
-    ownerReferences: z.array(
-      z.object({
-        kind: z.string(),
-        name: z.string(),
-      })
+    ownerReferences: z.optional(
+      z.array(
+        z.object({
+          kind: z.string(),
+          name: z.string(),
+        })
+      )
     ),
   }),
   spec: z.object({
@@ -199,11 +201,13 @@ export const jobSchema = z.object({
     name: z.string(),
     namespace: z.string(),
     creationTimestamp: z.coerce.date(),
-    ownerReferences: z.array(
-      z.object({
-        kind: z.string(),
-        name: z.string(),
-      })
+    ownerReferences: z.optional(
+      z.array(
+        z.object({
+          kind: z.string(),
+          name: z.string(),
+        })
+      )
     ),
   }),
   status: z.object({
@@ -232,7 +236,7 @@ export const cronjobSchema = z.object({
   }),
   status: z.object({
     lastScheduleTime: z.coerce.date(),
-    lastSuccessfulTime: z.coerce.date(),
+    lastSuccessfulTime: z.optional(z.coerce.date()),
   }),
 })
 export type RawCronjob = z.infer<typeof cronjobSchema>
