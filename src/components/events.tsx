@@ -22,7 +22,7 @@ export default function Events({ namespace }: { namespace: Namespace }) {
                 <div className="text-xs text-gray-500">
                   {dayjs(event.lastTimestamp).fromNow()}
                 </div>
-                {event.message}
+                {event.type}: {event.message}
               </>
             }
           >

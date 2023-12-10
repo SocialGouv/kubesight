@@ -24,6 +24,8 @@ import {
   RawJob,
   RawCronjob,
   RawEvent,
+  RawNamespace,
+  KubeData,
 } from "@/lib/kube/types"
 import { grepS3BucketFiles } from "@/lib/s3"
 
@@ -36,19 +38,19 @@ function makeCachedData<T>(data: T): CachedData<T> {
   return { data, lastRefresh: new Date() }
 }
 
-export const getCachedNamespaces = unstable_cache(
+export const getCachedKubeData = unstable_cache(
   async () => {
     console.log("-- refreshing data")
-    const cachedNamespaces = makeCachedData(await getNamespaces())
+    const cachedKubeData = makeCachedData(await getKubeData())
     console.log("     ok")
-    return cachedNamespaces
+    return cachedKubeData
   },
-  ["namespaces"],
+  ["kubeData"],
   { revalidate: 10 } //60 * 5 }
 )
 
 function getOrCreateNamespace(
-  namespaces: Record<string, Namespace>,
+  namespaces: Record<string, RawNamespace>,
   name: string
 ) {
   if (!(name in namespaces)) {
@@ -61,11 +63,13 @@ function getOrCreateNamespace(
       jobs: [],
       cronjobs: [],
       events: [],
+      cleanedDeployments: [],
+      cleanedCronjobs: [],
     }
   }
 }
 
-async function getNamespaces(): Promise<Array<Namespace>> {
+async function getKubeData(): Promise<KubeData> {
   try {
     const [
       pods,
@@ -85,7 +89,7 @@ async function getNamespaces(): Promise<Array<Namespace>> {
       getCnpgClusters(),
     ])
 
-    let namespaces: Record<string, Namespace> = {}
+    let namespaces: Record<string, RawNamespace> = {}
 
     for (const { name, items } of pods) {
       getOrCreateNamespace(namespaces, name)
@@ -109,19 +113,75 @@ async function getNamespaces(): Promise<Array<Namespace>> {
     }
     for (const { name, items } of events) {
       getOrCreateNamespace(namespaces, name)
-      namespaces[name].events = items as RawEvent[]
+      namespaces[name].events = (items as RawEvent[])?.filter(
+        (ev) => ev.metadata.namespace === name
+      )
     }
     for (const { name, items } of cnpgClusters) {
       getOrCreateNamespace(namespaces, name)
       namespaces[name].clusters = items as Cluster[]
     }
 
-    return _.map(namespaces, (nsList) => {
-      return nsList
+    const namespaceList = Object.values(namespaces)
+
+    for (const namespace of namespaceList) {
+      const cleanedDeployments = _.chain(namespace.pods)
+        .filter(
+          (pod) => pod.metadata.ownerReferences?.[0].kind === "ReplicaSet"
+        )
+        .groupBy("metadata.ownerReferences[0].name")
+        .map((rsPods, rsName) => {
+          const rs = namespace.replicasets.find(
+            (rs) => rs.metadata.name === rsName
+          )
+          const deployment = namespace.deployments.find(
+            (deploy) =>
+              deploy.metadata.name === rs?.metadata.ownerReferences[0].name
+          )
+          return { name: rsName, pods: rsPods, deployment }
+        })
+        .groupBy("deployment.metadata.name")
+        .map((rs, deployName) => {
+          return { name: deployName, replicasets: rs }
+        })
+        .value()
+
+      const cleanedCronjobs = _.chain(namespace.pods)
+        .filter((pod) => pod.metadata.ownerReferences?.[0].kind === "Job")
+        .groupBy("metadata.ownerReferences[0].name")
+        .map((jobPods, jobName) => {
+          const job = namespace.jobs.find((j) => j.metadata.name === jobName)
+          const cronjob = namespace.cronjobs.find(
+            (cronjob) =>
+              cronjob.metadata.name === job?.metadata?.ownerReferences[0].name
+          )
+          return { name: jobName, pods: jobPods, cronjob }
+        })
+        .groupBy("cronjob.metadata.name")
+        .map((cronJobs, cronjobName) => {
+          return { name: cronjobName, jobs: cronJobs }
+        })
+        .value()
+
+      namespace.cleanedDeployments = cleanedDeployments
+      namespace.cleanedCronjobs = cleanedCronjobs
+    }
+
+    const data: Namespace[] = namespaceList.map((ns) => {
+      return {
+        name: ns.name,
+        events: ns.events,
+        clusters: ns.clusters,
+        deployments: ns.cleanedDeployments,
+        cronjobs: ns.cleanedCronjobs,
+      }
     })
+    console.log(data)
+
+    return { namespaces: data, globalEvents: [] }
   } catch (e) {
     console.error(e)
-    return []
+    return { namespaces: [], globalEvents: [] }
   }
 }
 

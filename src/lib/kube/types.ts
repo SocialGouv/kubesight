@@ -127,17 +127,19 @@ export const podSchema = z.object({
         lastTransitionTime: z.coerce.date(),
       })
     ),
-    containerStatuses: z.array(
-      z.object({
-        image: z.string(),
-        name: z.string(),
-        ready: z.boolean(),
-        restartCount: z.number(),
-        started: z.boolean(),
-        state: z.object({
-          running: z.optional(z.object({ startedAt: z.coerce.date() })),
-        }),
-      })
+    containerStatuses: z.optional(
+      z.array(
+        z.object({
+          image: z.string(),
+          name: z.string(),
+          ready: z.boolean(),
+          restartCount: z.number(),
+          started: z.boolean(),
+          state: z.object({
+            running: z.optional(z.object({ startedAt: z.coerce.date() })),
+          }),
+        })
+      )
     ),
     phase: z.string(),
   }),
@@ -254,7 +256,27 @@ export type DumpFile = {
   lastModified: Date
 }
 
-export type Namespace = {
+export type Replicaset = {
+  name: string
+  pods: RawPod[]
+}
+
+export type Deployment = {
+  name: string
+  replicasets: Replicaset[]
+}
+
+export type Job = {
+  name: string
+  pods: RawPod[]
+}
+
+export type Cronjob = {
+  name: string
+  jobs: Job[]
+}
+
+export type RawNamespace = {
   name: string
   clusters: Cluster[]
   events: RawEvent[]
@@ -263,6 +285,21 @@ export type Namespace = {
   deployments: RawDeployment[]
   jobs: RawJob[]
   cronjobs: RawCronjob[]
+  cleanedDeployments: Deployment[]
+  cleanedCronjobs: Cronjob[]
+}
+
+export type Namespace = {
+  name: string
+  clusters: Cluster[]
+  events: RawEvent[]
+  deployments: Deployment[]
+  cronjobs: Cronjob[]
+}
+
+export type KubeData = {
+  globalEvents: RawEvent[]
+  namespaces: Namespace[]
 }
 
 export function isReady(cluster: Cluster): boolean {
