@@ -48,7 +48,13 @@ function Jobs({ cronjob }: { cronjob: Cronjob }) {
       </span>
       <div className="grid gap-1">
         {cronjob.jobs
-          .filter((job) => job.raw.status.succeeded !== 1)
+          .filter((job) => {
+            return (
+              job.raw.status.succeeded !== 1 &&
+              job.raw.status.completionTime >
+                lastSuccess?.raw.status.completionTime
+            )
+          })
           .map((job) => (
             <Job key={job.name} job={job} />
           ))}
