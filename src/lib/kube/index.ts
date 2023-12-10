@@ -176,12 +176,11 @@ async function getKubeData(): Promise<KubeData> {
         cronjobs: ns.cleanedCronjobs,
       }
     })
-    console.log(data)
 
-    return { namespaces: data, globalEvents: [] }
+    return { namespaces: data }
   } catch (e) {
     console.error(e)
-    return { namespaces: [], globalEvents: [] }
+    return { namespaces: [] }
   }
 }
 

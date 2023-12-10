@@ -298,7 +298,6 @@ export type Namespace = {
 }
 
 export type KubeData = {
-  globalEvents: RawEvent[]
   namespaces: Namespace[]
 }
 
