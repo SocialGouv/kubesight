@@ -46,7 +46,7 @@ export const getCachedKubeData = unstable_cache(
     return cachedKubeData
   },
   ["kubeData"],
-  { revalidate: 10 } //60 * 5 }
+  { revalidate: 60 * 10 }
 )
 
 function getOrCreateNamespace(
@@ -142,7 +142,7 @@ async function getKubeData(): Promise<KubeData> {
         })
         .groupBy("deployment.metadata.name")
         .map((rs, deployName) => {
-          return { name: deployName, replicasets: rs }
+          return { name: deployName, replicasets: rs, raw: rs[0].deployment }
         })
         .value()
 

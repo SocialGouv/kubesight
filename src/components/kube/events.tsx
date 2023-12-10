@@ -6,7 +6,7 @@ import Tooltip from "@/components/ui/tooltip"
 
 dayjs.extend(relativeTime)
 
-export default function Events({ namespace }: { namespace: Namespace }) {
+export default function EventsWidget({ namespace }: { namespace: Namespace }) {
   return (
     <ul className="list-disc text-left text-xs">
       {namespace.events

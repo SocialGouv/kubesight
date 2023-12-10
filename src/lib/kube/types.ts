@@ -263,6 +263,7 @@ export type Replicaset = {
 
 export type Deployment = {
   name: string
+  raw: RawDeployment
   replicasets: Replicaset[]
 }
 
