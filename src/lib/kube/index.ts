@@ -44,7 +44,7 @@ export const getCachedKubeData = unstable_cache(
     return cachedKubeData
   },
   ["kubeData"],
-  { revalidate: 10 } // 60 * 10 }
+  { revalidate: 60 * 10 }
 )
 
 function getOrCreateNamespace(
