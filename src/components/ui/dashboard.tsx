@@ -13,10 +13,11 @@ export default function Dashboard({
   cachedKubeData: CachedData<KubeData>
 }) {
   const searchParams = useSearchParams()!
-  const nsFilter = searchParams.get("ns-filter")
-  const namespaces = nsFilter
-    ? cachedKubeData.data.namespaces.filter((ns) => ns.name.includes(nsFilter))
-    : cachedKubeData.data.namespaces
+  const nsFilter = searchParams.get("ns-filter") ?? ""
+  const showOnlyErrors = searchParams.get("show-only-errors") === "true"
+  const namespaces = cachedKubeData.data.namespaces.filter((ns) =>
+    ns.name.includes(nsFilter)
+  )
 
   return (
     <>
