@@ -1,9 +1,11 @@
+import "server-only"
+
 import { Suspense } from "react"
 
 import { getCachedKubeData } from "@/lib/kube"
 
 import Spinner from "@/components/ui/spinner"
-import Dashboard from "@/components/ui/dashboard"
+import Dashboard from "@/components/kube/dashboard"
 
 export default async function Page() {
   return (

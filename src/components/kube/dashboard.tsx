@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"
 import Sidebar from "@/components/ui/sidebar"
 import Namespace from "@/components/kube/namespace"
 
-import { KubeData, CachedData } from "@/lib/kube/types"
+import { KubeData, CachedData, getNamespaceStatus } from "@/lib/kube/types"
 
 export default function Dashboard({
   cachedKubeData,
@@ -15,8 +15,10 @@ export default function Dashboard({
   const searchParams = useSearchParams()!
   const nsFilter = searchParams.get("ns-filter") ?? ""
   const showOnlyErrors = searchParams.get("show-only-errors") === "true"
-  const namespaces = cachedKubeData.data.namespaces.filter((ns) =>
-    ns.name.includes(nsFilter)
+  const namespaces = cachedKubeData.data.namespaces.filter(
+    (ns) =>
+      ns.name.includes(nsFilter) &&
+      (showOnlyErrors ? getNamespaceStatus(ns) === "error" : true)
   )
 
   return (

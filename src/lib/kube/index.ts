@@ -1,10 +1,10 @@
 import "server-only"
 
+import cron from "node-cron"
 import _ from "lodash"
 import { $ } from "execa"
 import { z, ZodTypeAny } from "zod"
 import pMap from "p-map"
-import { unstable_cache } from "next/cache"
 
 import {
   Namespace,
@@ -29,23 +29,29 @@ import {
   CachedData,
   Deployment,
   Cronjob,
+  makeCachedData,
 } from "@/lib/kube/types"
 import { grepS3BucketFiles } from "@/lib/s3"
 
-function makeCachedData<T>(data: T): CachedData<T> {
-  return { data, lastRefresh: new Date() }
+declare global {
+  var cachedData: CachedData<KubeData>
 }
 
-export const getCachedKubeData = unstable_cache(
-  async () => {
-    console.log("-- refreshing data")
-    const cachedKubeData = makeCachedData(await getKubeData())
-    console.log("     ok")
-    return cachedKubeData
-  },
-  ["kubeData"],
-  { revalidate: 60 * 10 }
-)
+export function getCachedKubeData(): CachedData<KubeData> {
+  if (!global.cachedData) {
+    global.cachedData = makeCachedData({ namespaces: [] })
+    cron.schedule("*/10 * * * * *", () => {
+      refreshData()
+    })
+  }
+  return global.cachedData
+}
+
+export async function refreshData() {
+  console.log("-- refreshing data")
+  global.cachedData = makeCachedData(await getKubeData())
+  console.log("-----> ok")
+}
 
 function getOrCreateNamespace(
   namespaces: Record<string, RawNamespace>,
@@ -67,7 +73,7 @@ function getOrCreateNamespace(
   }
 }
 
-async function getKubeData(): Promise<KubeData> {
+export async function getKubeData(): Promise<KubeData> {
   try {
     const [
       pods,
@@ -130,14 +136,22 @@ async function getKubeData(): Promise<KubeData> {
         .groupBy("metadata.ownerReferences[0].name")
         .map((rsPods, rsName) => {
           const rs = namespace.replicasets.find(
-            (rs) => rs.metadata.name === rsName
+            (r) => r.metadata.name === rsName
           )
+          if (!rs) {
+            console.error("=== rs not found")
+          }
           const deployment = namespace.deployments.find(
             (deploy) =>
               deploy.metadata.name === rs?.metadata.ownerReferences[0].name
           )
+
+          if (!deployment) {
+            console.error("=== deployment not found")
+          }
           return { name: rsName, pods: rsPods, deployment }
         })
+        .filter((item) => item.deployment !== undefined)
         .groupBy("deployment.metadata.name")
         .map((rs, deployName) => {
           return { name: deployName, replicasets: rs, raw: rs[0].deployment }
@@ -201,6 +215,7 @@ async function getResourceList<Resource, Schema extends ZodTypeAny>(
 
     return itemsByNamespaces
   } catch (e) {
+    console.error(">>>> resourceName:", resourceName)
     console.error(e)
     return []
   }

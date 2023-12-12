@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 
-import { Deployment } from "@/lib/kube/types"
+import { Deployment, getDeploymentStatus } from "@/lib/kube/types"
 import PodWidget from "@/components/kube/pod"
 
 export default function DeploymentWidget({
@@ -8,11 +8,11 @@ export default function DeploymentWidget({
 }: {
   deployment: Deployment
 }) {
-  const deploymenntIsReady = true // isReady(cluster)
+  const deploymenntIsOk = getDeploymentStatus(deployment) === "ok"
   return (
     <div
       className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
-      ${deploymenntIsReady ? "border-emerald-400" : "border-red-500"}
+      ${deploymenntIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
       <div className="p-2">

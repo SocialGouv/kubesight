@@ -1,4 +1,5 @@
 import { z } from "zod"
+import _ from "lodash"
 
 export type CachedData<T> = {
   data: T
@@ -59,17 +60,19 @@ export const clusterSchema = z.object({
   status: z.object({
     instances: z.number(),
     instanceNames: z.array(z.string()),
-    readyInstances: z.number(),
-    instancesStatus: z.object({
-      healthy: z.optional(z.array(z.string())),
-      replicating: z.optional(z.array(z.string())),
-      failed: z.optional(z.array(z.string())),
-    }),
+    readyInstances: z.optional(z.number()),
+    instancesStatus: z.optional(
+      z.object({
+        healthy: z.optional(z.array(z.string())),
+        replicating: z.optional(z.array(z.string())),
+        failed: z.optional(z.array(z.string())),
+      })
+    ),
     // instancesReportedState
     currentPrimary: z.string(),
     currentPrimaryTimestamp: z.coerce.date(),
-    targetPrimary: z.string(),
-    targetPrimaryTimestamp: z.coerce.date(),
+    targetPrimary: z.optional(z.string()),
+    targetPrimaryTimestamp: z.optional(z.coerce.date()),
     phase: z.string(),
     firstRecoverabilityPoint: z.optional(z.coerce.date()),
     lastSuccessfulBackup: z.optional(z.coerce.date()),
@@ -103,7 +106,7 @@ export const eventSchema = z.object({
       namespace: z.optional(z.string()),
     })
   ),
-  message: z.string(),
+  message: z.optional(z.string()),
   reason: z.string(),
   type: z.string(),
 })
@@ -240,7 +243,7 @@ export const cronjobSchema = z.object({
     creationTimestamp: z.coerce.date(),
   }),
   status: z.object({
-    lastScheduleTime: z.coerce.date(),
+    lastScheduleTime: z.optional(z.coerce.date()),
     lastSuccessfulTime: z.optional(z.coerce.date()),
   }),
 })
@@ -313,23 +316,23 @@ export type KubeData = {
   namespaces: Namespace[]
 }
 
-export function isReady(cluster: Cluster): boolean {
-  return cluster.status.instances === cluster.status.readyInstances
+export function makeCachedData<T>(data: T): CachedData<T> {
+  return { data, lastRefresh: new Date() }
 }
 
 export function getInstances(cluster: Cluster) {
   const primary = cluster.status.currentPrimary
 
   const healthy =
-    cluster.status.instancesStatus.healthy?.map((i) => {
+    cluster.status.instancesStatus?.healthy?.map((i) => {
       return { name: i, status: "healthy" }
     }) ?? []
   const replicating =
-    cluster.status.instancesStatus.replicating?.map((i) => {
+    cluster.status.instancesStatus?.replicating?.map((i) => {
       return { name: i, status: "replicating" }
     }) ?? []
   const failed =
-    cluster.status.instancesStatus.failed?.map((i) => {
+    cluster.status.instancesStatus?.failed?.map((i) => {
       return { name: i, status: "failed" }
     }) ?? []
 
@@ -345,4 +348,49 @@ export function getInstances(cluster: Cluster) {
       }
     })
   return instances
+}
+
+export type Status = "ok" | "warning" | "error"
+
+export function getPodStatus(pod: RawPod): Status {
+  const phase = pod.status.phase
+
+  if (phase === "Succeeded") {
+    return "ok"
+  } else if (phase === "Running") {
+    return "ok"
+  } else if (phase === "Pending") {
+    return "warning"
+  }
+  return "error" // "Failed" || "Unknown"
+}
+
+export function getCnpgClusterStatus(cluster: Cluster): Status {
+  return cluster.status.instances === cluster.status.readyInstances
+    ? "ok"
+    : "error"
+}
+
+export function getDeploymentStatus(deployment: Deployment): Status {
+  return deployment.raw.status.readyReplicas === deployment.raw.status.replicas
+    ? "ok"
+    : "error"
+}
+
+function hasError<Item>(
+  collection: Item[],
+  getStatus: (arg0: Item) => Status
+): boolean {
+  return _.some(collection, (item) => getStatus(item) === "error")
+}
+
+export function getNamespaceStatus(namespace: Namespace): Status {
+  if (
+    hasError(namespace.clusters, getCnpgClusterStatus) ||
+    hasError(namespace.deployments, getDeploymentStatus)
+  ) {
+    return "error"
+  }
+
+  return "ok"
 }

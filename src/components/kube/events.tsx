@@ -35,7 +35,7 @@ export default function EventsWidget({ namespace }: { namespace: Namespace }) {
               ) : (
                 <></>
               )}{" "}
-              {event.message.length > 40
+              {event.message?.length && event.message?.length > 40
                 ? event.message.substring(0, 40) + "..."
                 : event.message}
             </li>

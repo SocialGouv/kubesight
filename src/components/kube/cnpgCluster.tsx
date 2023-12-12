@@ -8,16 +8,16 @@ import {
   faFileZipper,
 } from "@fortawesome/free-solid-svg-icons"
 
-import { isReady, Cluster, getInstances } from "@/lib/kube/types"
+import { getCnpgClusterStatus, Cluster, getInstances } from "@/lib/kube/types"
 import Badge from "@/components/ui/badge"
 import Tooltip from "@/components/ui/tooltip"
 
 export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
-  const clusterIsReady = isReady(cluster)
+  const clusterIsOk = getCnpgClusterStatus(cluster) === "ok"
   return (
     <div
       className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
-      ${clusterIsReady ? "border-emerald-400" : "border-red-500"}
+      ${clusterIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
       <div className="p-2">
