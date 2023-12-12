@@ -147,6 +147,12 @@ export const podSchema = z.object({
           started: z.boolean(),
           state: z.object({
             running: z.optional(z.object({ startedAt: z.coerce.date() })),
+            waiting: z.optional(
+              z.object({
+                message: z.optional(z.string()),
+                reason: z.string(),
+              })
+            ),
           }),
         })
       )
@@ -352,13 +358,28 @@ export function getInstances(cluster: Cluster) {
 
 export type Status = "ok" | "warning" | "error"
 
+export function getPodContainerState(pod: RawPod) {
+  const state = pod.status.containerStatuses?.[0].state
+  if (state?.running) {
+    return "Running"
+  } else if (state?.waiting) {
+    return state.waiting.reason
+  } else {
+    return "Unknown"
+  }
+}
+
 export function getPodStatus(pod: RawPod): Status {
   const phase = pod.status.phase
 
   if (phase === "Succeeded") {
     return "ok"
   } else if (phase === "Running") {
-    return "ok"
+    const podState = getPodContainerState(pod)
+    if (podState === "Running") {
+      return "ok"
+    }
+    return "error"
   } else if (phase === "Pending") {
     return "warning"
   }

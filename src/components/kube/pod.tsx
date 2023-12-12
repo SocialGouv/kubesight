@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-import { RawPod, getPodStatus } from "@/lib/kube/types"
+import { RawPod, getPodStatus, getPodContainerState } from "@/lib/kube/types"
 import Badge from "@/components/ui/badge"
 import Tooltip from "@/components/ui/tooltip"
 import JsonWidget from "@/components/ui/json"
@@ -8,7 +8,11 @@ import JsonWidget from "@/components/ui/json"
 dayjs.extend(relativeTime)
 
 export default function PodWidget({ pod }: { pod: RawPod }) {
-  const podStatusInfo = pod.status.phase
+  const podStatusInfo =
+    pod.status.phase === "Running"
+      ? getPodContainerState(pod)
+      : pod.status.phase
+
   return (
     <Tooltip
       content={
@@ -24,7 +28,7 @@ export default function PodWidget({ pod }: { pod: RawPod }) {
         text={`${pod.metadata.name.split("-")?.pop()} | ${pod.status
           .containerStatuses?.[0].restartCount} | ${dayjs(
           pod.metadata.creationTimestamp
-        ).fromNow()} | ${pod.status.phase}`}
+        ).fromNow()} | ${podStatusInfo}`}
         status={getPodStatus(pod)}
       />
     </Tooltip>
