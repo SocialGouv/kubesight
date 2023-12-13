@@ -190,6 +190,13 @@ export const deploymentSchema = z.object({
     name: z.string(),
     namespace: z.string(),
     creationTimestamp: z.coerce.date(),
+    labels: z.optional(
+      z.object({
+        application: z.optional(z.string()),
+        app: z.optional(z.string()),
+        component: z.optional(z.string()),
+      })
+    ),
   }),
   status: z.object({
     availableReplicas: z.optional(z.number()),
@@ -247,6 +254,11 @@ export const cronjobSchema = z.object({
     name: z.string(),
     namespace: z.string(),
     creationTimestamp: z.coerce.date(),
+    labels: z.object({
+      application: z.optional(z.string()),
+      app: z.optional(z.string()),
+      component: z.optional(z.string()),
+    }),
   }),
   status: z.object({
     lastScheduleTime: z.optional(z.coerce.date()),
@@ -414,4 +426,21 @@ export function getNamespaceStatus(namespace: Namespace): Status {
   }
 
   return "ok"
+}
+
+export function getAppLabel(workload: Deployment | Cronjob): string {
+  const meta = workload.raw.metadata
+  const appLabel =
+    meta.labels?.component ||
+    meta.labels?.application ||
+    meta.labels?.app ||
+    meta.name
+  return appLabel
+}
+
+export function getLogsUrl(workload: Deployment | Cronjob): string | undefined {
+  return process.env.NEXT_PUBLIC_GRAFANA_URL_LOGS_DEPLOYMENT?.replace(
+    "{{namespace}}",
+    workload.raw.metadata.namespace
+  ).replace("{{app}}", getAppLabel(workload))
 }

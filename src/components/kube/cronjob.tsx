@@ -1,7 +1,7 @@
 import dayjs from "dayjs"
 import _ from "lodash"
 
-import { Cronjob, Job } from "@/lib/kube/types"
+import { Cronjob, Job, getLogsUrl } from "@/lib/kube/types"
 import PodWidget from "@/components/kube/pod"
 import Tooltip from "@/components/ui/tooltip"
 import JsonWidget from "@/components/ui/json"
@@ -23,12 +23,22 @@ export default function CronjobWidget({ cronjob }: { cronjob: Cronjob }) {
 }
 
 function Meta({ cronjob }: { cronjob: Cronjob }) {
+  const logsUrl = getLogsUrl(cronjob)
   return (
     <div className="flex flex-row justify-between">
       <span className="font-bold">{cronjob.name}</span>
       <span className="text-xs text-gray-500 text-right">
         <div className="font-bold capitalize">CRON</div>
-        <div>{dayjs(cronjob.raw?.metadata.creationTimestamp).fromNow()}</div>
+        <div>
+          {dayjs(cronjob.raw?.metadata.creationTimestamp).fromNow()}
+        </div>{" "}
+        {logsUrl && (
+          <div>
+            <a href={logsUrl} target="_blank">
+              Logs
+            </a>
+          </div>
+        )}
       </span>
     </div>
   )
