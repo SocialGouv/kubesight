@@ -17,6 +17,16 @@ fileignoreconfig:
   checksum: f8de366aab85679cb7dde1cc028b98b16301da2ae4d25f3743f70bcc7fc307ab
 - filename: next.config.js
   checksum: 5204c66ad2ecbce89abaab9e7505590f1c2ac717975ed5d991cad2000fc9f958
+- filename: src/components/kube/cronjob.tsx
+  checksum: b86c07eb18fd26f3442c90f98276c38996a1bf139cf874f4da5423ff5750783a
+- filename: src/components/kube/deployment.tsx
+  checksum: 68ad893626c4d340708f5e040cb32a44052e51af55b424a0c397d4bccb83e43a
+- filename: src/components/kube/namespace.tsx
+  checksum: e16b0eb5015eec0eeae6f15450d129aa3bd81f9fac354fa43a518d013afb9839
+- filename: src/components/ui/dashboard.tsx
+  checksum: 6f6b1280043342678754a692cd0a51b0a2814f21591ec6d783b9c68746ce5830
+- filename: src/lib/kube/index.ts
+  checksum: 6d9a50229a32e2fcb723500ecf28657264424bb1e9c9fa52d740822c9a3ca70a
 - filename: yarn.lock
   checksum: dfe3ab745d4e0072215d4f9683e0135ee678d5583ade96c8cb88eee277f86867
 scopeconfig:

@@ -2003,6 +2003,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node-cron@npm:^3":
+  version: 3.0.11
+  resolution: "@types/node-cron@npm:3.0.11"
+  checksum: 21cd0255988da2935bc8bf010da8b31624911ec10ef5d9a96a59c57193f60b27c1749b2e27c2a292a697d00195da5b8848a707345bb276abc39c96287ee82005
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^20":
   version: 20.9.1
   resolution: "@types/node@npm:20.9.1"
@@ -2113,6 +2120,16 @@ __metadata:
     "@typescript-eslint/types": "npm:6.11.0"
     eslint-visitor-keys: "npm:^3.4.1"
   checksum: 5f48329422b7f286196661d39e93e9defd7c5cf80e6c84c8d03459853f5d9f86a5e91c5e80ea572dcdb907ebbe503bbcc77aeb8b468c294b2aa7b3ccfc81cb88
+  languageName: node
+  linkType: hard
+
+"@uidotdev/usehooks@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@uidotdev/usehooks@npm:2.4.1"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 181c43fb324dbe4fef9762c61ab4b8235efa48abedf39a9bfeab65872522c43dae789c4f85b82a1164ed7bb18ae7ff25c3a19e7c4e0eb944937ac7f8109cee9b
   languageName: node
   linkType: hard
 
@@ -5569,8 +5586,10 @@ __metadata:
     "@types/is-ci": "npm:^3"
     "@types/lodash": "npm:^4"
     "@types/node": "npm:^20"
+    "@types/node-cron": "npm:^3"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
+    "@uidotdev/usehooks": "npm:^2.4.1"
     autoprefixer: "npm:^10.0.1"
     commit-and-tag-version: "npm:^12.0.0"
     dayjs: "npm:^1.11.10"
@@ -5583,6 +5602,7 @@ __metadata:
     is-ci: "npm:^3.0.1"
     lodash: "npm:^4.17.21"
     next: "npm:14.0.4"
+    node-cron: "npm:^3.0.3"
     node-talisman: "npm:^1.29.10"
     p-map: "npm:^6.0.0"
     pino: "npm:^8.16.2"
@@ -5592,6 +5612,7 @@ __metadata:
     prettier: "npm:^3.1.0"
     react: "npm:^18"
     react-dom: "npm:^18"
+    react18-json-view: "npm:^0.2.6"
     remeda: "npm:^1.29.0"
     server-only: "npm:^0.0.1"
     tailwindcss: "npm:^3.3.0"
@@ -6151,6 +6172,15 @@ __metadata:
   bin:
     next: dist/bin/next
   checksum: e6c829fd473d8c3605b2b62d15e1bf41e9d90cf59a2c213b4adeadff2846999bc9a653ffef18f6aa13cc9f5d6de02469c222acf5a4184901a4690a4504bd468f
+  languageName: node
+  linkType: hard
+
+"node-cron@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "node-cron@npm:3.0.3"
+  dependencies:
+    uuid: "npm:8.3.2"
+  checksum: e6e817c5bf28cca69f256ecc1a2cb737cf895cb0fe22f8ec58ce614cb74dcc22e93f495984a26ece51322473238ccc0ef53b4f373035697017b8c28bddacb9b9
   languageName: node
   linkType: hard
 
@@ -7002,6 +7032,15 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: 33977da7a5f1a287936a0c85639fec6ca74f4f15ef1e59a6bc20338fc73dc69555381e211f7a3529b8150a1f71e4225525b41b60b52965bda53ce7d47377ada1
+  languageName: node
+  linkType: hard
+
+"react18-json-view@npm:^0.2.6":
+  version: 0.2.6
+  resolution: "react18-json-view@npm:0.2.6"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: a77a63fcaccc85ce82183ef263170f783626d68e11a25ad59b9012f62f6ef682ebc1e57e9c67c4bb6ec3526fdf06ff0bee3a84b9973eb9d3fb93e3f94b37fa78
   languageName: node
   linkType: hard
 
@@ -8324,21 +8363,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:8.3.2, uuid@npm:^8.3.2":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: bcbb807a917d374a49f475fae2e87fdca7da5e5530820ef53f65ba1d12131bd81a92ecf259cc7ce317cbe0f289e7d79fdfebcef9bfa3087c8c8a2fa304c9be54
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^3.3.2":
   version: 3.4.0
   resolution: "uuid@npm:3.4.0"
   bin:
     uuid: ./bin/uuid
   checksum: 1c13950df865c4f506ebfe0a24023571fa80edf2e62364297a537c80af09c618299797bbf2dbac6b1f8ae5ad182ba474b89db61e0e85839683991f7e08795347
-  languageName: node
-  linkType: hard
-
-"uuid@npm:^8.3.2":
-  version: 8.3.2
-  resolution: "uuid@npm:8.3.2"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: bcbb807a917d374a49f475fae2e87fdca7da5e5530820ef53f65ba1d12131bd81a92ecf259cc7ce317cbe0f289e7d79fdfebcef9bfa3087c8c8a2fa304c9be54
   languageName: node
   linkType: hard
 

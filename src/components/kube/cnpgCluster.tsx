@@ -8,16 +8,16 @@ import {
   faFileZipper,
 } from "@fortawesome/free-solid-svg-icons"
 
-import { isReady, Cluster, getInstances } from "@/lib/kube/types"
-import Badge from "@/components/badge"
-import Tooltip from "@/components/tooltip"
+import { getCnpgClusterStatus, Cluster, getInstances } from "@/lib/kube/types"
+import Badge from "@/components/ui/badge"
+import Tooltip from "@/components/ui/tooltip"
 
 export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
-  const clusterIsReady = isReady(cluster)
+  const clusterIsOk = getCnpgClusterStatus(cluster) === "ok"
   return (
     <div
       className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
-      ${clusterIsReady ? "border-emerald-400" : "border-red-500"}
+      ${clusterIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
       <div className="p-2">
@@ -39,6 +39,7 @@ function Meta({ cluster }: { cluster: Cluster }) {
     <div className="flex flex-row justify-between">
       <span className="font-bold">{cluster.metadata.name}</span>
       <span className="text-xs text-gray-500 text-right">
+        <div className="font-bold capitalize">CNPG CLUSTER</div>
         <div>{dayjs(cluster.metadata.creationTimestamp).fromNow()}</div>
         <div>{cluster.metadata.labels?.["helm.sh/chart"]}</div>
       </span>

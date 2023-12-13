@@ -1,12 +1,12 @@
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Namespace } from "@/lib/kube/types"
-import Badge from "@/components/badge"
-import Tooltip from "@/components/tooltip"
+import Badge from "@/components/ui/badge"
+import Tooltip from "@/components/ui/tooltip"
 
 dayjs.extend(relativeTime)
 
-export default function Events({ namespace }: { namespace: Namespace }) {
+export default function EventsWidget({ namespace }: { namespace: Namespace }) {
   return (
     <ul className="list-disc text-left text-xs">
       {namespace.events
@@ -22,7 +22,7 @@ export default function Events({ namespace }: { namespace: Namespace }) {
                 <div className="text-xs text-gray-500">
                   {dayjs(event.lastTimestamp).fromNow()}
                 </div>
-                {event.message}
+                {event.type}: {event.message}
               </>
             }
           >
@@ -35,7 +35,7 @@ export default function Events({ namespace }: { namespace: Namespace }) {
               ) : (
                 <></>
               )}{" "}
-              {event.message.length > 40
+              {event.message?.length && event.message?.length > 40
                 ? event.message.substring(0, 40) + "..."
                 : event.message}
             </li>
