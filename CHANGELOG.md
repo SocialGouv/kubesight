@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.1.5 (2023-12-14)
+
+
+### Features
+
+* improve and fix cronjob status ([429a0f1](https://github.com/SocialGouv/kubesight/commit/429a0f13dea0ccb01db19f80a3875bd0a12afca6))
+
 ## 0.1.4 (2023-12-14)
 
 
