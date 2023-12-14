@@ -110,7 +110,9 @@ function Backup({ cluster }: { cluster: Cluster }) {
 }
 
 function Dumps({ cluster }: { cluster: Cluster }) {
-  if (!cluster.dumps || cluster.dumps.length === 0) {
+  if (!cluster.dumps) return
+
+  if (cluster.dumps.length === 0) {
     return (
       <div className="font-bold text-xs text-orange-500 pr-2">
         <FontAwesomeIcon

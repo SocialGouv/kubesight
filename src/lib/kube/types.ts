@@ -277,7 +277,7 @@ export type Cluster = RawCluster & {
     cpu: string
     memory: string
   }
-  dumps: Array<DumpFile>
+  dumps: Array<DumpFile> | undefined
 }
 
 export type DumpFile = {
@@ -295,6 +295,7 @@ export type Deployment = {
   name: string
   raw: RawDeployment
   replicasets: Replicaset[]
+  logsUrl?: string
 }
 
 export type Job = {
@@ -307,6 +308,7 @@ export type Cronjob = {
   name: string
   raw: RawCronjob
   jobs: Job[]
+  logsUrl?: string
 }
 
 export type RawNamespace = {
@@ -428,19 +430,12 @@ export function getNamespaceStatus(namespace: Namespace): Status {
   return "ok"
 }
 
-export function getAppLabel(workload: Deployment | Cronjob): string {
-  const meta = workload.raw.metadata
+export function getAppLabel(workload: RawDeployment | RawCronjob): string {
+  const meta = workload.metadata
   const appLabel =
     meta.labels?.component ||
     meta.labels?.application ||
     meta.labels?.app ||
     meta.name
   return appLabel
-}
-
-export function getLogsUrl(workload: Deployment | Cronjob): string | undefined {
-  return process.env.NEXT_PUBLIC_GRAFANA_URL_LOGS_DEPLOYMENT?.replace(
-    "{{namespace}}",
-    workload.raw.metadata.namespace
-  ).replace("{{app}}", getAppLabel(workload))
 }

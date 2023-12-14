@@ -16,6 +16,7 @@ import {
   deploymentSchema,
   DumpFile,
   eventSchema,
+  getAppLabel,
   jobSchema,
   KubeData,
   makeCachedData,
@@ -52,6 +53,15 @@ export async function refreshData() {
   console.log("-- refreshing data")
   global.cachedData = makeCachedData(await getKubeData())
   console.log("-----> ok")
+}
+
+export function getLogsUrl(
+  workload: RawDeployment | RawCronjob
+): string | undefined {
+  return process.env.GRAFANA_URL_LOGS_DEPLOYMENT?.replace(
+    "{{namespace}}",
+    workload.metadata.namespace
+  ).replace("{{app}}", getAppLabel(workload))
 }
 
 function getOrCreateNamespace(
@@ -155,7 +165,13 @@ export async function getKubeData(): Promise<KubeData> {
         .filter((item) => item.deployment !== undefined)
         .groupBy("deployment.metadata.name")
         .map((rs, deployName) => {
-          return { name: deployName, replicasets: rs, raw: rs[0].deployment }
+          const rawDeployment = rs[0].deployment
+          return {
+            name: deployName,
+            replicasets: rs,
+            raw: rawDeployment,
+            logsUrl: rawDeployment ? getLogsUrl(rawDeployment) : undefined,
+          }
         })
         .value()
 
@@ -172,7 +188,13 @@ export async function getKubeData(): Promise<KubeData> {
         })
         .groupBy("cronjob.metadata.name")
         .map((cronJobs, cronjobName) => {
-          return { name: cronjobName, jobs: cronJobs, raw: cronJobs[0].cronjob }
+          const rawCronjob = cronJobs[0].cronjob
+          return {
+            name: cronjobName,
+            jobs: cronJobs,
+            raw: rawCronjob,
+            logsUrl: rawCronjob ? getLogsUrl(rawCronjob) : undefined,
+          }
         })
         .value()
 
@@ -225,6 +247,7 @@ async function getResourceList<Resource, Schema extends ZodTypeAny>(
 async function getCnpgClusters(): Promise<
   Array<{ name: string; items: Cluster[] }>
 > {
+  const listDumps = process.env.CNPG_ENABLE_DUMPS === "true"
   try {
     const { stdout } =
       await $`kubectl get clusters.postgresql.cnpg.io -A -o json`
@@ -240,7 +263,7 @@ async function getCnpgClusters(): Promise<
           cluster,
         }),
         getCnpgPodStats({ cluster }),
-        getCnpgDumps({ cluster }),
+        listDumps ? getCnpgDumps({ cluster }) : undefined,
       ])
       return { ...cluster, storageStats, podStats, dumps }
     })

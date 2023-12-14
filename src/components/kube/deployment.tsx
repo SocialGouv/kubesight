@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 
-import { Deployment, getDeploymentStatus, getLogsUrl } from "@/lib/kube/types"
+import { Deployment, getDeploymentStatus } from "@/lib/kube/types"
 import PodWidget from "@/components/kube/pod"
 
 export default function DeploymentWidget({
@@ -24,16 +24,15 @@ export default function DeploymentWidget({
 }
 
 function Meta({ deployment }: { deployment: Deployment }) {
-  const logsUrl = getLogsUrl(deployment)
   return (
     <div className="flex flex-row justify-between">
       <span className="font-bold">{deployment.name}</span>
       <span className="text-xs text-gray-500 text-right">
         <div className="font-bold capitalize">DEPLOY</div>
         <div>{dayjs(deployment.raw.metadata.creationTimestamp).fromNow()}</div>
-        {logsUrl && (
+        {deployment.logsUrl && (
           <div>
-            <a href={logsUrl} target="_blank">
+            <a href={deployment.logsUrl} target="_blank">
               Logs
             </a>
           </div>
