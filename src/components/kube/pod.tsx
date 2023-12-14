@@ -24,13 +24,18 @@ export default function PodWidget({ pod }: { pod: RawPod }) {
         </>
       }
     >
-      <Badge
-        text={`${pod.metadata.name.split("-")?.pop()} | ${pod.status
+      <div
+        className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left text-xs
+          ${
+            getPodStatus(pod) === "ok" ? "border-emerald-400" : "border-red-500"
+          }
+        `}
+      >
+        {`${pod.metadata.name.split("-")?.pop()} | restarts: ${pod.status
           .containerStatuses?.[0].restartCount} | ${dayjs(
           pod.metadata.creationTimestamp
         ).fromNow()} | ${podStatusInfo}`}
-        status={getPodStatus(pod)}
-      />
+      </div>
     </Tooltip>
   )
 }

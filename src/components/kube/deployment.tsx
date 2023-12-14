@@ -8,11 +8,11 @@ export default function DeploymentWidget({
 }: {
   deployment: Deployment
 }) {
-  const deploymenntIsOk = getDeploymentStatus(deployment) === "ok"
+  const deploymentIsOk = getDeploymentStatus(deployment) === "ok"
   return (
     <div
       className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
-      ${deploymenntIsOk ? "border-emerald-400" : "border-red-500"}
+      ${deploymentIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
       <div className="p-2">

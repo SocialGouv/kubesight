@@ -175,23 +175,18 @@ export async function getKubeData(): Promise<KubeData> {
         })
         .value()
 
-      const cleanedCronjobs = _.chain(namespace.pods)
-        .filter((pod) => pod.metadata.ownerReferences?.[0].kind === "Job")
+      const cleanedCronjobs = _.chain(namespace.jobs)
         .groupBy("metadata.ownerReferences[0].name")
-        .map((jobPods, jobName) => {
-          const job = namespace.jobs.find((j) => j.metadata.name === jobName)
-          const cronjob = namespace.cronjobs.find(
-            (cronjob) =>
-              cronjob.metadata.name === job?.metadata?.ownerReferences?.[0].name
-          )
-          return { name: jobName, pods: jobPods, cronjob, raw: job }
-        })
-        .groupBy("cronjob.metadata.name")
         .map((cronJobs, cronjobName) => {
-          const rawCronjob = cronJobs[0].cronjob
+          const cleanedJobs = cronJobs.map((job) => {
+            return { name: job.metadata.name, raw: job }
+          })
+          const rawCronjob = namespace.cronjobs.find(
+            (cronjob) => cronjob.metadata.name === cronjobName
+          )
           return {
             name: cronjobName,
-            jobs: cronJobs,
+            jobs: cleanedJobs,
             raw: rawCronjob,
             logsUrl: rawCronjob ? getLogsUrl(rawCronjob) : undefined,
           }

@@ -236,6 +236,8 @@ export const jobSchema = z.object({
     completionTime: z.optional(z.coerce.date()),
     ready: z.number(),
     succeeded: z.optional(z.number()),
+    failed: z.optional(z.number()),
+    active: z.optional(z.number()),
     conditions: z.optional(
       z.array(
         z.object({
@@ -254,11 +256,13 @@ export const cronjobSchema = z.object({
     name: z.string(),
     namespace: z.string(),
     creationTimestamp: z.coerce.date(),
-    labels: z.object({
-      application: z.optional(z.string()),
-      app: z.optional(z.string()),
-      component: z.optional(z.string()),
-    }),
+    labels: z.optional(
+      z.object({
+        application: z.optional(z.string()),
+        app: z.optional(z.string()),
+        component: z.optional(z.string()),
+      })
+    ),
   }),
   status: z.object({
     lastScheduleTime: z.optional(z.coerce.date()),
@@ -301,7 +305,7 @@ export type Deployment = {
 export type Job = {
   name: string
   raw: RawJob
-  pods: RawPod[]
+  // pods: RawPod[]
 }
 
 export type Cronjob = {
@@ -383,6 +387,42 @@ export function getPodContainerState(pod: RawPod) {
   }
 }
 
+export function getJobStatus(job: RawJob): Status {
+  if (job.status.succeeded || job.status.active) {
+    return "ok"
+  }
+  return "error"
+}
+
+export function getLastSuccessfullJob(cronjob: Cronjob): Job | undefined {
+  const lastSuccess = _.chain(cronjob.jobs)
+    .filter((job) => job.raw.status.succeeded === 1)
+    .sortBy((job) => job.raw.status.completionTime?.getTime())
+    .last()
+    .value()
+  return lastSuccess
+}
+
+export function getJobsAfterlastSuccessfull(cronjob: Cronjob): Job[] {
+  const lastSuccess = getLastSuccessfullJob(cronjob)
+  const lastJobs = cronjob.jobs.filter(
+    (job) =>
+      job.raw.status.succeeded !== 1 &&
+      (lastSuccess?.raw.status.completionTime
+        ? job.raw.metadata.creationTimestamp.getTime() >
+          lastSuccess.raw.status.completionTime.getTime()
+        : true)
+  )
+  return lastJobs
+}
+
+export function getCronjobStatus(cronjob: Cronjob): Status {
+  const jobsAfterLastSuccessfull = getJobsAfterlastSuccessfull(cronjob)
+  return hasError(jobsAfterLastSuccessfull, (job) => getJobStatus(job.raw))
+    ? "error"
+    : "ok"
+}
+
 export function getPodStatus(pod: RawPod): Status {
   const phase = pod.status.phase
 
@@ -422,7 +462,8 @@ function hasError<Item>(
 export function getNamespaceStatus(namespace: Namespace): Status {
   if (
     hasError(namespace.clusters, getCnpgClusterStatus) ||
-    hasError(namespace.deployments, getDeploymentStatus)
+    hasError(namespace.deployments, getDeploymentStatus) ||
+    hasError(namespace.cronjobs, getCronjobStatus)
   ) {
     return "error"
   }

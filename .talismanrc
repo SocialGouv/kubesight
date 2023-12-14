@@ -18,7 +18,7 @@ fileignoreconfig:
 - filename: next.config.js
   checksum: 5204c66ad2ecbce89abaab9e7505590f1c2ac717975ed5d991cad2000fc9f958
 - filename: src/components/kube/cronjob.tsx
-  checksum: b86c07eb18fd26f3442c90f98276c38996a1bf139cf874f4da5423ff5750783a
+  checksum: 90f7b4d1ff3c0d30b35c52a9c80ccf2677db11b35a8f5c454d281558cf620a8f
 - filename: src/components/kube/deployment.tsx
   checksum: 68ad893626c4d340708f5e040cb32a44052e51af55b424a0c397d4bccb83e43a
 - filename: src/components/kube/namespace.tsx
