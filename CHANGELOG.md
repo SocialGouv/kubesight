@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.1.4 (2023-12-14)
+
+
+### Bug Fixes
+
+* get logs url from backend ([5148504](https://github.com/SocialGouv/kubesight/commit/5148504b2d62cb0712978fbd133368df37e1fdef))
+
 ## 0.1.3 (2023-12-13)
 
 
