@@ -1,13 +1,12 @@
 import { NodeSDK } from "@opentelemetry/sdk-node"
 
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http"
 import { Resource } from "@opentelemetry/resources"
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions"
-import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node"
 import {
   SentrySpanProcessor,
   SentryPropagator,
 } from "@sentry/opentelemetry-node"
+import { startCron } from "./lib/cron"
 
 const sdk = new NodeSDK({
   resource: new Resource({
@@ -19,3 +18,5 @@ const sdk = new NodeSDK({
 })
 
 sdk.start()
+
+startCron()

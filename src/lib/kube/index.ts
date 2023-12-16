@@ -1,10 +1,7 @@
-import "server-only"
-
 import { trace } from "@opentelemetry/api"
 
 import { $ } from "execa"
 import _ from "lodash"
-import cron from "node-cron"
 import pMap from "p-map"
 import { z, ZodTypeAny } from "zod"
 
@@ -42,7 +39,7 @@ declare global {
 
 const tracer = trace.getTracer("cron")
 
-function autotrace<T>(
+export function autotrace<T>(
   description: string,
   fn: () => Promise<T>
 ): () => Promise<T> {
@@ -86,19 +83,7 @@ function autotrace_2<Arg1, Arg2, T>(
 }
 
 export function getCachedKubeData(): CachedData<KubeData> {
-  if (!global.cachedData) {
-    global.cachedData = makeCachedData({ namespaces: [] })
-    cron.schedule("*/10 * * * * *", async () => {
-      autotrace("refreshData", refreshData)()
-    })
-  }
   return global.cachedData
-}
-
-export async function refreshData() {
-  console.log("-- refreshing data")
-  global.cachedData = makeCachedData(await getKubeData())
-  console.log("-----> ok")
 }
 
 export function getLogsUrl(

@@ -1,5 +1,3 @@
-import "server-only"
-
 import { z } from "zod"
 import { S3Client, ListObjectsCommand } from "@aws-sdk/client-s3"
 import { DumpFile } from "@/lib/kube/types"
