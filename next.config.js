@@ -71,6 +71,7 @@ module.exports = {
       },
     ]
   },
+  experimental: { instrumentationHook: true },
 }
 
 module.exports = withSentryConfig(module.exports, { silent: true })

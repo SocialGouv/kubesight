@@ -17,6 +17,10 @@ fileignoreconfig:
   checksum: f8de366aab85679cb7dde1cc028b98b16301da2ae4d25f3743f70bcc7fc307ab
 - filename: next.config.js
   checksum: 5204c66ad2ecbce89abaab9e7505590f1c2ac717975ed5d991cad2000fc9f958
+- filename: sentry.client.config.ts
+  checksum: feca2fb4f890b31270b7c02f9507389fcf680084113d9e7a13aa401eb3be934f
+- filename: sentry.edge.config.ts
+  checksum: 045356a04fbdcee166279d6e0d75fd38c607177aa20414eed82fa39fcb948ee9
 - filename: src/components/kube/cronjob.tsx
   checksum: 90f7b4d1ff3c0d30b35c52a9c80ccf2677db11b35a8f5c454d281558cf620a8f
 - filename: src/components/kube/deployment.tsx
