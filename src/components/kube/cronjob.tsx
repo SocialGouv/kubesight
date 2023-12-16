@@ -4,6 +4,7 @@ import _ from "lodash"
 import {
   Cronjob,
   Job,
+  getJobStatus,
   getCronjobStatus,
   getLastSuccessfullJob,
   getJobsAfterlastSuccessfull,
@@ -57,7 +58,7 @@ function Jobs({ cronjob }: { cronjob: Cronjob }) {
       </div>
       {jobsAfterLastSuccess.length > 0 && (
         <div className="text-sm text-gray-700 py-2">
-          Last failed job:
+          Latest jobs:
           <div className="grid gap-1">
             {jobsAfterLastSuccess.map((job) => (
               <Job key={job.name} job={job} />
@@ -80,10 +81,11 @@ function Job({ job }: { job: Job }) {
       }
     >
       <div
-        key={job.name}
-        className={
-          "col-span-1 rounded-lg bg-white shadow border-l-8 text-left border-red-500 p-2"
-        }
+        className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
+      ${
+        getJobStatus(job.raw) === "ok" ? "border-emerald-400" : "border-red-500"
+      }
+    `}
       >
         {job.name}
       </div>
