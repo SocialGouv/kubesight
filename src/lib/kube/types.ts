@@ -195,6 +195,7 @@ export const deploymentSchema = z.object({
         application: z.optional(z.string()),
         app: z.optional(z.string()),
         component: z.optional(z.string()),
+        "app.kubernetes.io/name": z.optional(z.string()),
       })
     ),
   }),
@@ -261,6 +262,7 @@ export const cronjobSchema = z.object({
         application: z.optional(z.string()),
         app: z.optional(z.string()),
         component: z.optional(z.string()),
+        "app.kubernetes.io/name": z.optional(z.string()),
       })
     ),
   }),
@@ -477,6 +479,7 @@ export function getAppLabel(workload: RawDeployment | RawCronjob): string {
     meta.labels?.component ||
     meta.labels?.application ||
     meta.labels?.app ||
+    meta.labels?.["app.kubernetes.io/name"] ||
     meta.name
   return appLabel
 }
