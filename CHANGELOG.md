@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.1.6 (2023-12-18)
+
+
+### Bug Fixes
+
+* improve app name detection ([49ec717](https://github.com/SocialGouv/kubesight/commit/49ec717eadc1ae6090159dfe797848814427abc9))
+
 ## 0.1.5 (2023-12-14)
 
 
