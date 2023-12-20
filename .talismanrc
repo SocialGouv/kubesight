@@ -30,7 +30,7 @@ fileignoreconfig:
 - filename: src/components/ui/dashboard.tsx
   checksum: 6f6b1280043342678754a692cd0a51b0a2814f21591ec6d783b9c68746ce5830
 - filename: src/lib/kube/index.ts
-  checksum: 6d9a50229a32e2fcb723500ecf28657264424bb1e9c9fa52d740822c9a3ca70a
+  checksum: a8ae45bb160eb878ee2e472a04c2fcc3adf5d02ef5e2d9469d75c0a7d73e62dc
 - filename: yarn.lock
   checksum: dfe3ab745d4e0072215d4f9683e0135ee678d5583ade96c8cb88eee277f86867
 scopeconfig:

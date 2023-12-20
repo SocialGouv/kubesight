@@ -367,43 +367,48 @@ async function getCnpgDumps({
     return []
   }
 
-  const s3Credentials = cluster.spec.backup?.barmanObjectStore?.s3Credentials
-  const config = { namespace: cluster.metadata.namespace }
+  try {
+    const s3Credentials = cluster.spec.backup?.barmanObjectStore?.s3Credentials
+    const config = { namespace: cluster.metadata.namespace }
 
-  const accessKeyIdPromise = getSecretValue({
-    ...config,
-    secretName: s3Credentials?.accessKeyId.name,
-    secretKey: s3Credentials?.accessKeyId.key,
-  })
-  const secretAccessKeyPromise = getSecretValue({
-    ...config,
-    secretName: s3Credentials?.secretAccessKey.name,
-    secretKey: s3Credentials?.secretAccessKey.key,
-  })
-  const regionPromise = getSecretValue({
-    ...config,
-    secretName: s3Credentials?.region.name,
-    secretKey: s3Credentials?.region.key,
-  })
+    const accessKeyIdPromise = getSecretValue({
+      ...config,
+      secretName: s3Credentials?.accessKeyId.name,
+      secretKey: s3Credentials?.accessKeyId.key,
+    })
+    const secretAccessKeyPromise = getSecretValue({
+      ...config,
+      secretName: s3Credentials?.secretAccessKey.name,
+      secretKey: s3Credentials?.secretAccessKey.key,
+    })
+    const regionPromise = getSecretValue({
+      ...config,
+      secretName: s3Credentials?.region.name,
+      secretKey: s3Credentials?.region.key,
+    })
 
-  const [accessKeyId, secretAccessKey, region] = await Promise.all([
-    accessKeyIdPromise,
-    secretAccessKeyPromise,
-    regionPromise,
-  ])
+    const [accessKeyId, secretAccessKey, region] = await Promise.all([
+      accessKeyIdPromise,
+      secretAccessKeyPromise,
+      regionPromise,
+    ])
 
-  const [_s3, _empty, bucketName, prefix] =
-    cluster.spec.backup?.barmanObjectStore?.destinationPath.split("/")
+    const [_s3, _empty, bucketName, prefix] =
+      cluster.spec.backup?.barmanObjectStore?.destinationPath.split("/")
 
-  return grepS3BucketFiles({
-    accessKeyId,
-    secretAccessKey,
-    region,
-    endpoint: cluster.spec.backup?.barmanObjectStore?.endpointURL,
-    bucketName: bucketName,
-    prefix: `${prefix}/${cluster.metadata.name}/dumps`,
-    searchString: ".psql.gz",
-  })
+    return grepS3BucketFiles({
+      accessKeyId,
+      secretAccessKey,
+      region,
+      endpoint: cluster.spec.backup?.barmanObjectStore?.endpointURL,
+      bucketName: bucketName,
+      prefix: `${prefix}/${cluster.metadata.name}/dumps`,
+      searchString: ".psql.gz",
+    })
+  } catch (e) {
+    console.error(e)
+    return []
+  }
 }
 
 async function getSecretValue({
