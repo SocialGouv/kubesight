@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.1.7 (2023-12-20)
+
+
+### Bug Fixes
+
+* handle missing secret for cnpg dumps ([2f7ca4c](https://github.com/SocialGouv/kubesight/commit/2f7ca4c5f0eb7ce3a2a2ed653d38835d07b61106))
+
 ## 0.1.6 (2023-12-18)
 
 
