@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.8](https://github.com/SocialGouv/kubesight/compare/v0.1.7...v0.1.8) (2024-01-11)
+
+
+### Bug Fixes
+
+* pod status is ok when pod is running AND ready ([fedf194](https://github.com/SocialGouv/kubesight/commit/fedf194921afdc80e5614fe9cce7635822ce3b8d))
+
 ## 0.1.7 (2023-12-20)
 
 
