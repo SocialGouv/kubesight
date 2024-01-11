@@ -432,7 +432,7 @@ export function getPodStatus(pod: RawPod): Status {
     return "ok"
   } else if (phase === "Running") {
     const podState = getPodContainerState(pod)
-    if (podState === "Running") {
+    if (podState === "Running" && pod.status.containerStatuses?.[0].ready) {
       return "ok"
     }
     return "error"
