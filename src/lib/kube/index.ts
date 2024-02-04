@@ -1,5 +1,3 @@
-import { trace } from "@opentelemetry/api"
-
 import { $ } from "execa"
 import _ from "lodash"
 import pMap from "p-map"
@@ -35,51 +33,6 @@ import { grepS3BucketFiles } from "@/lib/s3"
 
 declare global {
   var cachedData: CachedData<KubeData>
-}
-
-const tracer = trace.getTracer("cron")
-
-export function autotrace<T>(
-  description: string,
-  fn: () => Promise<T>
-): () => Promise<T> {
-  return async () => {
-    return await tracer.startActiveSpan(description, async (span) => {
-      try {
-        return await fn()
-      } finally {
-        span.end()
-      }
-    })
-  }
-}
-function autotrace_1<Arg, T>(
-  description: string,
-  fn: (arg: Arg) => Promise<T>
-): (arg: Arg) => Promise<T> {
-  return async (arg: Arg) => {
-    return await tracer.startActiveSpan(description, async (span) => {
-      try {
-        return await fn(arg)
-      } finally {
-        span.end()
-      }
-    })
-  }
-}
-function autotrace_2<Arg1, Arg2, T>(
-  description: string,
-  fn: (arg1: Arg1, arg2: Arg2) => Promise<T>
-): (arg1: Arg1, arg2: Arg2) => Promise<T> {
-  return async (arg1: Arg1, arg2: Arg2) => {
-    return await tracer.startActiveSpan(description, async (span) => {
-      try {
-        return await fn(arg1, arg2)
-      } finally {
-        span.end()
-      }
-    })
-  }
 }
 
 export function getCachedKubeData(): CachedData<KubeData> {
@@ -126,13 +79,13 @@ export async function getKubeData(): Promise<KubeData> {
       events,
       cnpgClusters,
     ] = await Promise.all([
-      tracedGetResourceList("pods", podSchema),
-      tracedGetResourceList("replicasets", replicasetSchema),
-      tracedGetResourceList("deployments", deploymentSchema),
-      tracedGetResourceList("jobs", jobSchema),
-      tracedGetResourceList("cronjobs", cronjobSchema),
-      tracedGetResourceList("events", eventSchema),
-      autotrace("getCnpgClusters", getCnpgClusters)(),
+      getResourceList("pods", podSchema),
+      getResourceList("replicasets", replicasetSchema),
+      getResourceList("deployments", deploymentSchema),
+      getResourceList("jobs", jobSchema),
+      getResourceList("cronjobs", cronjobSchema),
+      getResourceList("events", eventSchema),
+      getCnpgClusters(),
     ])
 
     let namespaces: Record<string, RawNamespace> = {}
@@ -246,24 +199,12 @@ export async function getKubeData(): Promise<KubeData> {
   }
 }
 
-async function tracedGetResourceList<Resource, Schema extends ZodTypeAny>(
-  resourceName: string,
-  schema: Schema
-): Promise<Array<{ name: string; items: Array<Resource> }>> {
-  return autotrace_2(`getResourceList${resourceName}`, getResourceList)(
-    resourceName,
-    schema
-  )
-}
-
 async function getResourceList<Resource, Schema extends ZodTypeAny>(
   resourceName: string,
   schema: Schema
 ): Promise<Array<{ name: string; items: Array<Resource> }>> {
   try {
-    const span = tracer.startSpan(`kubectl get ${resourceName}`)
     const { stdout } = await $`kubectl get ${resourceName} -A -o json`
-    span.end()
 
     const getItemsSchema = z.object({ items: z.array(schema) })
     const rawItems = getItemsSchema.parse(JSON.parse(stdout)).items
@@ -288,33 +229,24 @@ async function getCnpgClusters(): Promise<
 > {
   const listDumps = process.env.CNPG_ENABLE_DUMPS === "true"
   try {
-    const span1 = tracer.startSpan(`kubectl get cnpgs`)
     const { stdout } =
       await $`kubectl get clusters.postgresql.cnpg.io -A -o json`
-    span1.end()
 
     const getClustersSchema = z.object({
       items: z.array(clusterSchema),
     })
     const rawClusters = getClustersSchema.parse(JSON.parse(stdout)).items
 
-    const span2 = tracer.startSpan("get storage and pod stats")
     const clusters: Cluster[] = await pMap(rawClusters, async (cluster) => {
       const [storageStats, podStats, dumps] = await Promise.all([
-        autotrace_1(
-          "get cnpg storage stats",
-          getCnpgStorageStats
-        )({
+        getCnpgStorageStats({
           cluster,
         }),
-        autotrace_1("get cnpg pod stats", getCnpgPodStats)({ cluster }),
-        listDumps
-          ? autotrace_1("get cnpg dumps", getCnpgDumps)({ cluster })
-          : undefined,
+        getCnpgPodStats({ cluster }),
+        listDumps ? getCnpgDumps({ cluster }) : undefined,
       ])
       return { ...cluster, storageStats, podStats, dumps }
     })
-    span2.end()
 
     const clustersByNamespaces = _.chain(clusters)
       .groupBy((item) => item.metadata.namespace)

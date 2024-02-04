@@ -1,6 +1,6 @@
 import cron from "node-cron"
 import { makeCachedData } from "@/lib/kube/types"
-import { autotrace, getKubeData } from "@/lib/kube"
+import { getKubeData } from "@/lib/kube"
 
 export async function refreshData() {
   console.log("-- refreshing data")
@@ -10,7 +10,5 @@ export async function refreshData() {
 
 export function startCron() {
   global.cachedData = makeCachedData({ namespaces: [] })
-  cron.schedule("*/10 * * * * *", async () => {
-    autotrace("refreshData", refreshData)()
-  })
+  cron.schedule("*/10 * * * * *", refreshData)
 }
