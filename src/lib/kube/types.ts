@@ -274,16 +274,16 @@ export const cronjobSchema = z.object({
 export type RawCronjob = z.infer<typeof cronjobSchema>
 
 export type Cluster = RawCluster & {
-  storageStats: {
-    total: string
-    used: string
-    percentUsed: string
-  }
-  podStats: {
-    cpu: string
-    memory: string
-  }
-  dumps: Array<DumpFile> | undefined
+  // storageStats: {
+  //   total: string
+  //   used: string
+  //   percentUsed: string
+  // }
+  // podStats: {
+  //   cpu: string
+  //   memory: string
+  // }
+  // dumps: Array<DumpFile> | undefined
 }
 
 export type DumpFile = {
@@ -399,7 +399,10 @@ export function getJobStatus(job: RawJob): Status {
 export function getLastSuccessfullJob(cronjob: Cronjob): Job | undefined {
   const lastSuccess = _.chain(cronjob.jobs)
     .filter((job) => job.raw.status.succeeded === 1)
-    .sortBy((job) => job.raw.status.completionTime?.getTime())
+    .sortBy((job) => {
+      const time = new Date(job.raw.status.completionTime as any) // cast because of wrong typing in k8s client
+      return time?.getTime()
+    })
     .last()
     .value()
   return lastSuccess
@@ -411,8 +414,8 @@ export function getJobsAfterlastSuccessfull(cronjob: Cronjob): Job[] {
     (job) =>
       job.raw.status.succeeded !== 1 &&
       (lastSuccess?.raw.status.completionTime
-        ? job.raw.metadata.creationTimestamp.getTime() >
-          lastSuccess.raw.status.completionTime.getTime()
+        ? new Date(job.raw.metadata.creationTimestamp).getTime() >
+          new Date(lastSuccess.raw.status.completionTime).getTime()
         : true)
   )
   return lastJobs

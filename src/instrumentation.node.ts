@@ -6,7 +6,8 @@ import {
   SentrySpanProcessor,
   SentryPropagator,
 } from "@sentry/opentelemetry-node"
-import { startCron } from "./lib/cron"
+import { startWatchingKube } from "./lib/node-kube"
+// import { startCron } from "./lib/cron"
 
 const sdk = new NodeSDK({
   resource: new Resource({
@@ -19,4 +20,5 @@ const sdk = new NodeSDK({
 
 sdk.start()
 
-startCron()
+// startCron()
+startWatchingKube()

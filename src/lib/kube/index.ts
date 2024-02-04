@@ -1,35 +1,28 @@
 import { $ } from "execa"
 import _ from "lodash"
 import pMap from "p-map"
-import { z, ZodTypeAny } from "zod"
+import { z } from "zod"
 
 import {
   CachedData,
   Cluster,
   clusterSchema,
   Cronjob,
-  cronjobSchema,
   Deployment,
-  deploymentSchema,
   DumpFile,
-  eventSchema,
   getAppLabel,
-  jobSchema,
   KubeData,
-  makeCachedData,
   Namespace,
-  podSchema,
   RawCluster,
   RawCronjob,
   RawDeployment,
   RawEvent,
   RawJob,
-  RawNamespace,
   RawPod,
   RawReplicaSet,
-  replicasetSchema,
 } from "@/lib/kube/types"
 import { grepS3BucketFiles } from "@/lib/s3"
+import { localKubeCache } from "../node-kube"
 
 declare global {
   var cachedData: CachedData<KubeData>
@@ -48,102 +41,38 @@ export function getLogsUrl(
   ).replace("{{app}}", getAppLabel(workload))
 }
 
-function getOrCreateNamespace(
-  namespaces: Record<string, RawNamespace>,
-  name: string
-) {
-  if (!(name in namespaces)) {
-    namespaces[name] = {
-      name,
-      clusters: [],
-      pods: [],
-      replicasets: [],
-      deployments: [],
-      jobs: [],
-      cronjobs: [],
-      events: [],
-      cleanedDeployments: [],
-      cleanedCronjobs: [],
-    }
-  }
-}
-
 export async function getKubeData(): Promise<KubeData> {
   try {
-    const [
-      pods,
-      replicasets,
-      deployments,
-      jobs,
-      cronjobs,
-      events,
-      cnpgClusters,
-    ] = await Promise.all([
-      getResourceList("pods", podSchema),
-      getResourceList("replicasets", replicasetSchema),
-      getResourceList("deployments", deploymentSchema),
-      getResourceList("jobs", jobSchema),
-      getResourceList("cronjobs", cronjobSchema),
-      getResourceList("events", eventSchema),
-      getCnpgClusters(),
-    ])
+    const namespaces: Namespace[] = []
 
-    let namespaces: Record<string, RawNamespace> = {}
+    for (const namespace of Object.keys(localKubeCache)) {
+      const pods = Object.values(
+        localKubeCache[namespace].Pod || {}
+      ) as RawPod[]
+      const replicasets = Object.values(
+        (localKubeCache[namespace].ReplicaSet || {}) as any
+      ) as RawReplicaSet[]
+      const deployments = Object.values(
+        localKubeCache[namespace].Deployment || {}
+      ) as RawDeployment[]
+      const jobs = Object.values(
+        localKubeCache[namespace].Job || {}
+      ) as RawJob[]
+      const cronjobs = Object.values(
+        localKubeCache[namespace].CronJob || {}
+      ) as RawCronjob[]
 
-    for (const { name, items } of pods) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].pods = items as RawPod[]
-    }
-    for (const { name, items } of replicasets) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].replicasets = items as RawReplicaSet[]
-    }
-    for (const { name, items } of deployments) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].deployments = items as RawDeployment[]
-    }
-    for (const { name, items } of jobs) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].jobs = items as RawJob[]
-    }
-    for (const { name, items } of cronjobs) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].cronjobs = items as RawCronjob[]
-    }
-    for (const { name, items } of events) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].events = (items as RawEvent[])?.filter(
-        (ev) => ev.metadata.namespace === name
-      )
-    }
-    for (const { name, items } of cnpgClusters) {
-      getOrCreateNamespace(namespaces, name)
-      namespaces[name].clusters = items as Cluster[]
-    }
-
-    const namespaceList = Object.values(namespaces)
-
-    for (const namespace of namespaceList) {
-      const cleanedDeployments = _.chain(namespace.pods)
+      const cleanedDeployments = _.chain(pods)
         .filter(
           (pod) => pod.metadata.ownerReferences?.[0].kind === "ReplicaSet"
         )
         .groupBy("metadata.ownerReferences[0].name")
         .map((rsPods, rsName) => {
-          const rs = namespace.replicasets.find(
-            (r) => r.metadata.name === rsName
-          )
-          if (!rs) {
-            console.error("=== rs not found")
-          }
-          const deployment = namespace.deployments.find(
+          const rs = replicasets.find((r) => r.metadata.name === rsName)
+          const deployment = deployments.find(
             (deploy) =>
               deploy.metadata.name === rs?.metadata.ownerReferences[0].name
           )
-
-          if (!deployment) {
-            console.error("=== deployment not found")
-          }
           return { name: rsName, pods: rsPods, deployment }
         })
         .filter((item) => item.deployment !== undefined)
@@ -159,13 +88,13 @@ export async function getKubeData(): Promise<KubeData> {
         })
         .value()
 
-      const cleanedCronjobs = _.chain(namespace.jobs)
+      const cleanedCronjobs = _.chain(jobs)
         .groupBy("metadata.ownerReferences[0].name")
         .map((cronJobs, cronjobName) => {
           const cleanedJobs = cronJobs.map((job) => {
             return { name: job.metadata.name, raw: job }
           })
-          const rawCronjob = namespace.cronjobs.find(
+          const rawCronjob = cronjobs.find(
             (cronjob) => cronjob.metadata.name === cronjobName
           )
           return {
@@ -177,88 +106,23 @@ export async function getKubeData(): Promise<KubeData> {
         })
         .value()
 
-      // TODO: fix type casts
-      namespace.cleanedDeployments = cleanedDeployments as Deployment[]
-      namespace.cleanedCronjobs = cleanedCronjobs as Cronjob[]
+      namespaces.push({
+        name: namespace,
+        events: Object.values(
+          localKubeCache[namespace].Event || {}
+        ) as RawEvent[],
+        clusters: Object.values(
+          localKubeCache[namespace].Cluster || {}
+        ) as Cluster[],
+        deployments: cleanedDeployments as Deployment[],
+        cronjobs: cleanedCronjobs as Cronjob[],
+      })
     }
 
-    const data: Namespace[] = namespaceList.map((ns) => {
-      return {
-        name: ns.name,
-        events: ns.events,
-        clusters: ns.clusters,
-        deployments: ns.cleanedDeployments,
-        cronjobs: ns.cleanedCronjobs,
-      }
-    })
-
-    return { namespaces: data }
+    return { namespaces }
   } catch (e) {
     console.error(e)
     return { namespaces: [] }
-  }
-}
-
-async function getResourceList<Resource, Schema extends ZodTypeAny>(
-  resourceName: string,
-  schema: Schema
-): Promise<Array<{ name: string; items: Array<Resource> }>> {
-  try {
-    const { stdout } = await $`kubectl get ${resourceName} -A -o json`
-
-    const getItemsSchema = z.object({ items: z.array(schema) })
-    const rawItems = getItemsSchema.parse(JSON.parse(stdout)).items
-
-    const itemsByNamespaces = _.chain(rawItems)
-      .groupBy((item) => item.metadata.namespace)
-      .map((items, namespaceName) => {
-        return { name: namespaceName, items: items }
-      })
-      .value()
-
-    return itemsByNamespaces
-  } catch (e) {
-    console.error(">>>> resourceName:", resourceName)
-    console.error(e)
-    return []
-  }
-}
-
-async function getCnpgClusters(): Promise<
-  Array<{ name: string; items: Cluster[] }>
-> {
-  const listDumps = process.env.CNPG_ENABLE_DUMPS === "true"
-  try {
-    const { stdout } =
-      await $`kubectl get clusters.postgresql.cnpg.io -A -o json`
-
-    const getClustersSchema = z.object({
-      items: z.array(clusterSchema),
-    })
-    const rawClusters = getClustersSchema.parse(JSON.parse(stdout)).items
-
-    const clusters: Cluster[] = await pMap(rawClusters, async (cluster) => {
-      const [storageStats, podStats, dumps] = await Promise.all([
-        getCnpgStorageStats({
-          cluster,
-        }),
-        getCnpgPodStats({ cluster }),
-        listDumps ? getCnpgDumps({ cluster }) : undefined,
-      ])
-      return { ...cluster, storageStats, podStats, dumps }
-    })
-
-    const clustersByNamespaces = _.chain(clusters)
-      .groupBy((item) => item.metadata.namespace)
-      .map((items, namespaceName) => {
-        return { name: namespaceName, items: items }
-      })
-      .value()
-
-    return clustersByNamespaces
-  } catch (e) {
-    console.error(e)
-    return []
   }
 }
 
@@ -280,14 +144,6 @@ async function getCnpgStorageStats({ cluster }: { cluster: RawCluster }) {
     postgresLine.split(/\s+/)
 
   return { total, used, percentUsed }
-}
-
-async function getCnpgPodStats({ cluster }: { cluster: RawCluster }) {
-  const { stdout } =
-    await $`kubectl top --namespace ${cluster.metadata.namespace} --no-headers=true pod ${cluster.status.currentPrimary}`
-  const [_pod, cpu, memory] = stdout.split(/\s+/)
-
-  return { cpu, memory }
 }
 
 async function getCnpgDumps({

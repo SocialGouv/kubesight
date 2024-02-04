@@ -14,7 +14,11 @@ export default function EventsWidget({ namespace }: { namespace: Namespace }) {
         .filter((event) =>
           dayjs(event.lastTimestamp).isAfter(dayjs().subtract(1, "hour"))
         )
-        .sort((a, b) => b.lastTimestamp.getTime() - a.lastTimestamp.getTime())
+        .sort(
+          (a, b) =>
+            new Date(b.lastTimestamp).getTime() -
+            new Date(a.lastTimestamp).getTime()
+        )
         .map((event) => (
           <Tooltip
             key={event.metadata.name}

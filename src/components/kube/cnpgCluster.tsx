@@ -1,12 +1,6 @@
 import dayjs from "dayjs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-  faHardDrive,
-  faMemory,
-  faMicrochip,
-  faFloppyDisk,
-  faFileZipper,
-} from "@fortawesome/free-solid-svg-icons"
+import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons"
 
 import { getCnpgClusterStatus, Cluster, getInstances } from "@/lib/kube/types"
 import Badge from "@/components/ui/badge"
@@ -24,10 +18,10 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
         <Meta cluster={cluster} />
         <Instances cluster={cluster} />
         <Backup cluster={cluster} />
-        <Dumps cluster={cluster} />
-        <Memory cluster={cluster} />
-        <Cpu cluster={cluster} />
-        <Storage cluster={cluster} />
+        {/* <Dumps cluster={cluster} /> */}
+        {/* <Memory cluster={cluster} /> */}
+        {/* <Cpu cluster={cluster} /> */}
+        {/* <Storage cluster={cluster} /> */}
         <Phase cluster={cluster} />
       </div>
     </div>
@@ -109,123 +103,123 @@ function Backup({ cluster }: { cluster: Cluster }) {
   )
 }
 
-function Dumps({ cluster }: { cluster: Cluster }) {
-  if (!cluster.dumps) return
-
-  if (cluster.dumps.length === 0) {
-    return (
-      <div className="font-bold text-xs text-orange-500 pr-2">
-        <FontAwesomeIcon
-          className={`h-4 w-4 inline-block mr-2`}
-          icon={faFileZipper}
-        />
-        no dump
-      </div>
-    )
-  }
-  return (
-    <Tooltip
-      content={
-        <>
-          <div className="text-sm text-gray-700 font-bold">Dumps</div>
-          <ul>
-            {cluster.dumps?.map((dump) => {
-              return (
-                <li key={dump.name}>
-                  {dayjs(dump.lastModified).format("YYYY/MM/DD HH:mm")}
-                  {" - "}
-                  {dump.size
-                    ? formatBytes({ bytes: dump.size, decimals: 2 })
-                    : "empty"}{" "}
-                  : {dump.name}
-                </li>
-              )
-            })}
-          </ul>
-        </>
-      }
-    >
-      <div className="font-bold text-xs text-gray-500 pr-2">
-        <FontAwesomeIcon
-          className={`h-4 w-4 inline-block mr-2`}
-          icon={faFileZipper}
-        />
-        {cluster.dumps.length + " dumps"}
-        {` - last: ${formatBytes({
-          bytes: cluster.dumps[cluster.dumps.length - 1].size ?? 0,
-          decimals: 2,
-        })}`}
-      </div>
-    </Tooltip>
-  )
-}
-
-function Memory({ cluster }: { cluster: Cluster }) {
-  return (
-    <Tooltip
-      content={
-        <>
-          <div className="text-sm text-gray-700 font-bold">Memory</div>
-          request / current / limit
-        </>
-      }
-    >
-      <div className="font-bold text-xs text-gray-500 pr-2">
-        <FontAwesomeIcon
-          className={`h-4 w-4 inline-block mr-2`}
-          icon={faMemory}
-        />
-        {`${cluster.spec.resources?.requests?.memory ?? "none"} / ${
-          cluster.podStats.memory
-        } / ${cluster.spec.resources?.limits?.memory ?? "none"}`}
-      </div>
-    </Tooltip>
-  )
-}
-
-function Cpu({ cluster }: { cluster: Cluster }) {
-  return (
-    <Tooltip
-      content={
-        <>
-          <div className="text-sm text-gray-700 font-bold">CPU</div>
-          request / current / limit
-        </>
-      }
-    >
-      <div className="font-bold text-xs text-gray-500 pr-2">
-        <FontAwesomeIcon
-          className={`h-4 w-4 inline-block mr-2`}
-          icon={faMicrochip}
-        />
-        {`${cluster.spec.resources?.requests?.cpu ?? "none"} / ${
-          cluster.podStats.cpu
-        } / ${cluster.spec.resources?.limits?.cpu ?? "none"}`}
-      </div>
-    </Tooltip>
-  )
-}
-
-function Storage({ cluster }: { cluster: Cluster }) {
-  return (
-    <Tooltip
-      content={
-        <>
-          <div className="text-sm text-gray-700 font-bold">Storage</div>
-          %used (used / total)
-        </>
-      }
-    >
-      <div className="font-bold text-xs text-gray-500 pr-2">
-        <FontAwesomeIcon
-          className={`h-4 w-4 inline-block mr-2`}
-          icon={faHardDrive}
-        />
-        {`${cluster.storageStats.percentUsed} (${cluster.storageStats.used} / ${cluster.storageStats.total})`}
-      </div>
-    </Tooltip>
-  )
-}
+// function Dumps({ cluster }: { cluster: Cluster }) {
+//   if (!cluster.dumps) return
+//
+//   if (cluster.dumps.length === 0) {
+//     return (
+//       <div className="font-bold text-xs text-orange-500 pr-2">
+//         <FontAwesomeIcon
+//           className={`h-4 w-4 inline-block mr-2`}
+//           icon={faFileZipper}
+//         />
+//         no dump
+//       </div>
+//     )
+//   }
+//   return (
+//     <Tooltip
+//       content={
+//         <>
+//           <div className="text-sm text-gray-700 font-bold">Dumps</div>
+//           <ul>
+//             {cluster.dumps?.map((dump) => {
+//               return (
+//                 <li key={dump.name}>
+//                   {dayjs(dump.lastModified).format("YYYY/MM/DD HH:mm")}
+//                   {" - "}
+//                   {dump.size
+//                     ? formatBytes({ bytes: dump.size, decimals: 2 })
+//                     : "empty"}{" "}
+//                   : {dump.name}
+//                 </li>
+//               )
+//             })}
+//           </ul>
+//         </>
+//       }
+//     >
+//       <div className="font-bold text-xs text-gray-500 pr-2">
+//         <FontAwesomeIcon
+//           className={`h-4 w-4 inline-block mr-2`}
+//           icon={faFileZipper}
+//         />
+//         {cluster.dumps.length + " dumps"}
+//         {` - last: ${formatBytes({
+//           bytes: cluster.dumps[cluster.dumps.length - 1].size ?? 0,
+//           decimals: 2,
+//         })}`}
+//       </div>
+//     </Tooltip>
+//   )
+// }
+//
+// function Memory({ cluster }: { cluster: Cluster }) {
+//   return (
+//     <Tooltip
+//       content={
+//         <>
+//           <div className="text-sm text-gray-700 font-bold">Memory</div>
+//           request / current / limit
+//         </>
+//       }
+//     >
+//       <div className="font-bold text-xs text-gray-500 pr-2">
+//         <FontAwesomeIcon
+//           className={`h-4 w-4 inline-block mr-2`}
+//           icon={faMemory}
+//         />
+//         {`${cluster.spec.resources?.requests?.memory ?? "none"} / ${
+//           cluster.podStats.memory
+//         } / ${cluster.spec.resources?.limits?.memory ?? "none"}`}
+//       </div>
+//     </Tooltip>
+//   )
+// }
+//
+// function Cpu({ cluster }: { cluster: Cluster }) {
+//   return (
+//     <Tooltip
+//       content={
+//         <>
+//           <div className="text-sm text-gray-700 font-bold">CPU</div>
+//           request / current / limit
+//         </>
+//       }
+//     >
+//       <div className="font-bold text-xs text-gray-500 pr-2">
+//         <FontAwesomeIcon
+//           className={`h-4 w-4 inline-block mr-2`}
+//           icon={faMicrochip}
+//         />
+//         {`${cluster.spec.resources?.requests?.cpu ?? "none"} / ${
+//           cluster.podStats.cpu
+//         } / ${cluster.spec.resources?.limits?.cpu ?? "none"}`}
+//       </div>
+//     </Tooltip>
+//   )
+// }
+//
+// function Storage({ cluster }: { cluster: Cluster }) {
+//   return (
+//     <Tooltip
+//       content={
+//         <>
+//           <div className="text-sm text-gray-700 font-bold">Storage</div>
+//           %used (used / total)
+//         </>
+//       }
+//     >
+//       <div className="font-bold text-xs text-gray-500 pr-2">
+//         <FontAwesomeIcon
+//           className={`h-4 w-4 inline-block mr-2`}
+//           icon={faHardDrive}
+//         />
+//         {`${cluster.storageStats.percentUsed} (${cluster.storageStats.used} / ${cluster.storageStats.total})`}
+//       </div>
+//     </Tooltip>
+//   )
+// }
 
 function Phase({ cluster }: { cluster: Cluster }) {
   if (cluster.status.phase !== "Cluster in healthy state") {
