@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons"
+import { faFloppyDisk, faMemory } from "@fortawesome/free-solid-svg-icons"
 
 import { getCnpgClusterStatus, Cluster, getInstances } from "@/lib/kube/types"
 import Badge from "@/components/ui/badge"
@@ -19,7 +19,7 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
         <Instances cluster={cluster} />
         <Backup cluster={cluster} />
         {/* <Dumps cluster={cluster} /> */}
-        {/* <Memory cluster={cluster} /> */}
+        <Memory cluster={cluster} />
         {/* <Cpu cluster={cluster} /> */}
         {/* <Storage cluster={cluster} /> */}
         <Phase cluster={cluster} />
@@ -154,28 +154,25 @@ function Backup({ cluster }: { cluster: Cluster }) {
 //   )
 // }
 //
-// function Memory({ cluster }: { cluster: Cluster }) {
-//   return (
-//     <Tooltip
-//       content={
-//         <>
-//           <div className="text-sm text-gray-700 font-bold">Memory</div>
-//           request / current / limit
-//         </>
-//       }
-//     >
-//       <div className="font-bold text-xs text-gray-500 pr-2">
-//         <FontAwesomeIcon
-//           className={`h-4 w-4 inline-block mr-2`}
-//           icon={faMemory}
-//         />
-//         {`${cluster.spec.resources?.requests?.memory ?? "none"} / ${
-//           cluster.podStats.memory
-//         } / ${cluster.spec.resources?.limits?.memory ?? "none"}`}
-//       </div>
-//     </Tooltip>
-//   )
-// }
+function Memory({ cluster }: { cluster: Cluster }) {
+  return (
+    <Tooltip
+      content={
+        <>
+          <div className="text-sm text-gray-700 font-bold">Memory request</div>
+        </>
+      }
+    >
+      <div className="font-bold text-xs text-gray-500 pr-2">
+        <FontAwesomeIcon
+          className={`h-4 w-4 inline-block mr-2`}
+          icon={faMemory}
+        />
+        {cluster.spec.resources?.requests?.memory ?? "none"}
+      </div>
+    </Tooltip>
+  )
+}
 //
 // function Cpu({ cluster }: { cluster: Cluster }) {
 //   return (
