@@ -64,7 +64,7 @@
     "eslint-config-next": "14.0.4",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "husky": "^8.0.3",
+    "husky": "^9.0.0",
     "is-ci": "^3.0.1",
     "node-talisman": "^1.29.10",
     "pino-pretty": "^10.2.3",
