@@ -54,7 +54,10 @@ function Jobs({ cronjob }: { cronjob: Cronjob }) {
   return (
     <div>
       <div className="text-xs text-gray-500 text-right">
-        Last success: {dayjs(lastSuccess?.raw.status.completionTime).fromNow()}
+        Last success:{" "}
+        {lastSuccess
+          ? dayjs(lastSuccess?.raw.status.completionTime).fromNow()
+          : "none"}
       </div>
       {jobsAfterLastSuccess.length > 0 && (
         <div className="text-sm text-gray-700 py-2">
