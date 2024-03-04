@@ -50,6 +50,9 @@ function handleWatchEvent<T extends KubeResource>(
   }
 
   debouncedRefreshData()
+
+  if (kind === "CLuster") {
+  }
 }
 
 function doWatch(api: string) {

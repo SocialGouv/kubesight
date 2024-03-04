@@ -23,16 +23,21 @@ export default function Dashboard({
 
   return (
     <>
+      <main className="lg:pl-72">
+        <ul role="list" className="divide-y divide-gray-100">
+          {namespaces.map((ns) => (
+            <li
+              key={ns.name}
+              className="gap-x-4 px-4 py-2 hover:bg-gray-50 sm:px-6 lg:px-8"
+            >
+              <Namespace namespace={ns} />
+            </li>
+          ))}
+        </ul>
+      </main>
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <Sidebar cachedKubeData={cachedKubeData} />
       </div>
-      <main className="lg:pl-72">
-        <div className="m-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1600px]:grid-cols-5 min-[1800px]:grid-cols-6">
-          {namespaces.map((ns) => (
-            <Namespace key={ns.name} namespace={ns} />
-          ))}
-        </div>
-      </main>
     </>
   )
 }

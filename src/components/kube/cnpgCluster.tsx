@@ -10,11 +10,11 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
   const clusterIsOk = getCnpgClusterStatus(cluster) === "ok"
   return (
     <div
-      className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
+      className={`col-span-1 rounded-lg bg-white shadow border-l-8 w-full
       ${clusterIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
-      <div className="p-2">
+      <div className="flex gap-x-1 w-full">
         <Meta cluster={cluster} />
         <Instances cluster={cluster} />
         <Backup cluster={cluster} />
@@ -25,19 +25,36 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
         <Phase cluster={cluster} />
       </div>
     </div>
+
+    // <div
+    //   className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
+    //   ${clusterIsOk ? "border-emerald-400" : "border-red-500"}
+    // `}
+    // >
+    //   <div className="p-2">
+    //     <Meta cluster={cluster} />
+    //     <Instances cluster={cluster} />
+    //     <Backup cluster={cluster} />
+    //     {/* <Dumps cluster={cluster} /> */}
+    //     <Memory cluster={cluster} />
+    //     {/* <Cpu cluster={cluster} /> */}
+    //     {/* <Storage cluster={cluster} /> */}
+    //     <Phase cluster={cluster} />
+    //   </div>
+    // </div>
   )
 }
 
 function Meta({ cluster }: { cluster: Cluster }) {
   return (
-    <div className="flex flex-row justify-between">
-      <span className="font-bold">{cluster.metadata.name}</span>
-      <span className="text-xs text-gray-500 text-right">
-        <div className="font-bold capitalize">CNPG CLUSTER</div>
+    <div className="flex flex-row justify-between w-2/6 gap-x-1">
+      <div className="font-bold">{cluster.metadata.name}</div>
+      <div className="text-xs text-gray-500 text-right flex flex-row gap-x-1 px-2">
+        <div>|</div>
         <div>{dayjs(cluster.metadata.creationTimestamp).fromNow()}</div>
-        <div>{cluster.metadata.labels?.["helm.sh/chart"]}</div>
-      </span>
+      </div>
     </div>
+    // <div>{cluster.metadata.labels?.["helm.sh/chart"]}</div>
   )
 }
 
@@ -220,11 +237,7 @@ function Memory({ cluster }: { cluster: Cluster }) {
 
 function Phase({ cluster }: { cluster: Cluster }) {
   if (cluster.status.phase !== "Cluster in healthy state") {
-    return (
-      <div className="pt-2">
-        <li>{cluster.status.phase}</li>
-      </div>
-    )
+    return <div className="pt-2">{cluster.status.phase}</div>
   }
 }
 
