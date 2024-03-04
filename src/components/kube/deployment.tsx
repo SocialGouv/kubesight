@@ -36,7 +36,9 @@ function Meta({ deployment }: { deployment: Deployment }) {
           </div>
         )}
         <div>|</div>
-        <div>{dayjs(deployment.raw.metadata.creationTimestamp).fromNow()}</div>
+        <div className="w-5">
+          {dayjs(deployment.raw.metadata.creationTimestamp).fromNow()}
+        </div>
       </div>
     </div>
   )
@@ -44,10 +46,10 @@ function Meta({ deployment }: { deployment: Deployment }) {
 
 function ReplicaSets({ deployment }: { deployment: Deployment }) {
   return (
-    <div className="flex gap-1 w-4/6">
+    <div className="flex flex-col gap-1 w-4/6">
       {deployment.replicasets.map((replicaset) => (
         <div key={replicaset.name} className="w-full">
-          <div className="grid gap-1 w-full">
+          <div className="flex flex-col gap-1 w-full">
             {replicaset.pods.map((pod) => (
               <PodWidget key={pod.metadata.name} pod={pod}></PodWidget>
             ))}

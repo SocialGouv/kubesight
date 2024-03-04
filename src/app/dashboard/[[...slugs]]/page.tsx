@@ -2,7 +2,7 @@ import "server-only"
 
 import { Suspense } from "react"
 
-import { getCachedKubeData } from "@/lib/kube"
+import { getCachedData } from "@/app/data"
 
 import Spinner from "@/components/ui/spinner"
 import Dashboard from "@/components/kube/dashboard"
@@ -24,6 +24,6 @@ export default async function Page() {
 }
 
 async function Main() {
-  const cachedKubeData = await getCachedKubeData()
+  const cachedKubeData = getCachedData()
   return <Dashboard cachedKubeData={cachedKubeData} />
 }

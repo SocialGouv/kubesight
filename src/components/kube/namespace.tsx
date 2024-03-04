@@ -1,13 +1,8 @@
-import dayjs from "dayjs"
-import relativeTime from "dayjs/plugin/relativeTime"
-
 import { Namespace, getNamespaceStatus } from "@/lib/kube/types"
 import EventsWidget from "@/components/kube/events"
 import ClusterWidget from "@/components/kube/cnpgCluster"
 import DeploymentWidget from "@/components/kube/deployment"
 import CronjobWidget from "@/components/kube/cronjob"
-
-dayjs.extend(relativeTime)
 
 export default function Namespace({ namespace }: { namespace: Namespace }) {
   const namespaceIdOk = getNamespaceStatus(namespace) === "ok"

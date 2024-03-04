@@ -1,66 +1,97 @@
-import * as k8s from "@kubernetes/client-node"
-import { debouncedRefreshData } from "./cron"
+import { KubeConfig, Watch, V1ObjectMeta } from "@kubernetes/client-node"
+import _ from "lodash"
+import { makeCachedData, CachedData, KubeData } from "@/lib/kube/types"
+import { getKubeData } from "@/lib/kube"
 
-const kubeconfig = new k8s.KubeConfig()
-kubeconfig.loadFromDefault()
-const watch = new k8s.Watch(kubeconfig)
+const allContexts = ["dev", "prod", "ovh-dev", "ovh-prod"]
 
+const mainKubeConfig = new KubeConfig()
+mainKubeConfig.loadFromDefault()
+
+const watchers: Record<string, Watch> = {}
+
+function loadKubeConfigForContext(contextName: string) {
+  const kubeConfigForContext = new KubeConfig()
+  kubeConfigForContext.loadFromDefault()
+  kubeConfigForContext.setCurrentContext(contextName)
+
+  watchers[contextName] = new Watch(kubeConfigForContext)
+}
+
+mainKubeConfig
+  .getContexts()
+  .filter((context) => allContexts.includes(context.name))
+  .forEach((context) => {
+    loadKubeConfigForContext(context.name)
+  })
+
+type Cluster = string
 type Ns = string
 type Kind = string
 type Name = string
 export const localKubeCache: Record<
-  Ns,
-  Record<Kind, Record<Name, KubeResource>>
+  Cluster,
+  Record<Ns, Record<Kind, Record<Name, KubeResource>>>
 > = {}
 
 type KubeResource = {
   kind?: string
-  metadata?: k8s.V1ObjectMeta
+  metadata?: V1ObjectMeta
+}
+function handleWatchEventForCluster(cluster: string) {
+  return function handleWatchEvent<T extends KubeResource>(
+    eventType: string,
+    resource: T
+  ): void {
+    if (!resource.kind || !resource.metadata || !resource.metadata.name) {
+      console.error(
+        "kube resource missing kind or metadata or name or namespace",
+        resource
+      )
+      return
+    }
+
+    if (!(cluster in localKubeCache)) {
+      localKubeCache[cluster] = {}
+    }
+
+    const ns = resource.metadata?.namespace || "default"
+    if (!(ns in localKubeCache[cluster])) {
+      localKubeCache[cluster][ns] = {}
+    }
+    const kind = resource.kind
+    if (!(kind in localKubeCache[cluster][ns])) {
+      localKubeCache[cluster][ns][kind] = {}
+    }
+
+    switch (eventType) {
+      case "ADDED":
+      case "MODIFIED":
+        localKubeCache[cluster][ns][kind][resource.metadata.name] = resource
+        break
+      case "DELETED":
+        delete localKubeCache[cluster][ns][kind][resource.metadata.name]
+        break
+    }
+
+    debouncedRefreshData()
+
+    if (kind === "CLuster") {
+    }
+  }
 }
 
-function handleWatchEvent<T extends KubeResource>(
-  eventType: string,
-  resource: T
-): void {
-  if (!resource.kind || !resource.metadata || !resource.metadata.name) {
-    console.error(
-      "kube resource missing kind or metadata or name or namespace",
-      resource
-    )
-    return
-  }
-
-  const ns = resource.metadata?.namespace || "default"
-  if (!(ns in localKubeCache)) {
-    localKubeCache[ns] = {}
-  }
-  const kind = resource.kind
-  if (!(kind in localKubeCache[ns])) {
-    localKubeCache[ns][kind] = {}
-  }
-
-  switch (eventType) {
-    case "ADDED":
-    case "MODIFIED":
-      localKubeCache[ns][kind][resource.metadata.name] = resource
-      break
-    case "DELETED":
-      delete localKubeCache[ns][kind][resource.metadata.name]
-      break
-  }
-
-  debouncedRefreshData()
-
-  if (kind === "CLuster") {
-  }
-}
-
-function doWatch(api: string) {
-  console.log("watching api", api)
-  watch.watch(api, {}, handleWatchEvent, (err: any) => {
-    console.error(err)
-    doWatch(api)
-  })
+function doWatch(cluster: string, api: string) {
+  console.log(cluster, "-> watching api", api)
+  watchers[cluster].watch(
+    api,
+    {},
+    handleWatchEventForCluster(cluster),
+    (err: any) => {
+      console.error(err)
+      doWatch(cluster, api)
+    }
+  )
 }
 
 export async function startWatchingKube() {
@@ -75,7 +106,25 @@ export async function startWatchingKube() {
     "/apis/postgresql.cnpg.io/v1/clusters",
   ]
 
-  for (const path of apiPaths) {
-    doWatch(path)
+  for (const cluster of Object.keys(watchers)) {
+    for (const path of apiPaths) {
+      doWatch(cluster, path)
+    }
   }
+}
+
+export const debouncedRefreshData = _.debounce(refreshData, 1000, {
+  maxWait: 1000,
+})
+
+export async function refreshData() {
+  const start = new Date().getTime()
+  global.cachedData = makeCachedData(await getKubeData())
+  console.log(
+    "refreshed data in",
+    new Date().getTime() - start,
+    "ms"
+    // ">>",
+    // Object.entries(cachedKubeData.cache.data.dev)
+  )
 }

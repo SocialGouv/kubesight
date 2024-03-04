@@ -51,7 +51,9 @@ function Meta({ cluster }: { cluster: Cluster }) {
       <div className="font-bold">{cluster.metadata.name}</div>
       <div className="text-xs text-gray-500 text-right flex flex-row gap-x-1 px-2">
         <div>|</div>
-        <div>{dayjs(cluster.metadata.creationTimestamp).fromNow()}</div>
+        <div className="w-5">
+          {dayjs(cluster.metadata.creationTimestamp).fromNow()}
+        </div>
       </div>
     </div>
     // <div>{cluster.metadata.labels?.["helm.sh/chart"]}</div>

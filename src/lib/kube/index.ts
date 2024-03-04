@@ -1,12 +1,10 @@
 import { $ } from "execa"
 import _ from "lodash"
-import pMap from "p-map"
-import { z } from "zod"
+// import pMap from "p-map"
+// import { z } from "zod"
 
 import {
-  CachedData,
   Cluster,
-  clusterSchema,
   Cronjob,
   Deployment,
   DumpFile,
@@ -24,14 +22,6 @@ import {
 import { grepS3BucketFiles } from "@/lib/s3"
 import { localKubeCache } from "../node-kube"
 
-declare global {
-  var cachedData: CachedData<KubeData>
-}
-
-export function getCachedKubeData(): CachedData<KubeData> {
-  return global.cachedData
-}
-
 export function getLogsUrl(
   workload: RawDeployment | RawCronjob
 ): string | undefined {
@@ -42,24 +32,31 @@ export function getLogsUrl(
 }
 
 export async function getKubeData(): Promise<KubeData> {
+  const kubeData: KubeData = {}
+
+  for (const cluster of Object.keys(localKubeCache)) {
+    kubeData[cluster] = await getKubeDataForCluster(cluster)
+  }
+
+  return kubeData
+}
+
+async function getKubeDataForCluster(cluster: string) {
+  const kubeCache = localKubeCache[cluster]
   try {
     const namespaces: Namespace[] = []
 
-    for (const namespace of Object.keys(localKubeCache)) {
-      const pods = Object.values(
-        localKubeCache[namespace].Pod || {}
-      ) as RawPod[]
+    for (const namespace of Object.keys(kubeCache)) {
+      const pods = Object.values(kubeCache[namespace].Pod || {}) as RawPod[]
       const replicasets = Object.values(
-        (localKubeCache[namespace].ReplicaSet || {}) as any
+        (kubeCache[namespace].ReplicaSet || {}) as any
       ) as RawReplicaSet[]
       const deployments = Object.values(
-        localKubeCache[namespace].Deployment || {}
+        kubeCache[namespace].Deployment || {}
       ) as RawDeployment[]
-      const jobs = Object.values(
-        localKubeCache[namespace].Job || {}
-      ) as RawJob[]
+      const jobs = Object.values(kubeCache[namespace].Job || {}) as RawJob[]
       const cronjobs = Object.values(
-        localKubeCache[namespace].CronJob || {}
+        kubeCache[namespace].CronJob || {}
       ) as RawCronjob[]
 
       const cleanedDeployments = _.chain(pods)
@@ -108,11 +105,9 @@ export async function getKubeData(): Promise<KubeData> {
 
       namespaces.push({
         name: namespace,
-        events: Object.values(
-          localKubeCache[namespace].Event || {}
-        ) as RawEvent[],
+        events: Object.values(kubeCache[namespace].Event || {}) as RawEvent[],
         clusters: Object.values(
-          localKubeCache[namespace].Cluster || {}
+          kubeCache[namespace].Cluster || {}
         ) as Cluster[],
         deployments: cleanedDeployments as Deployment[],
         cronjobs: cleanedCronjobs as Cronjob[],

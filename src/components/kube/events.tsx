@@ -1,10 +1,7 @@
 import dayjs from "dayjs"
-import relativeTime from "dayjs/plugin/relativeTime"
 import { Namespace } from "@/lib/kube/types"
 import Badge from "@/components/ui/badge"
 import Tooltip from "@/components/ui/tooltip"
-
-dayjs.extend(relativeTime)
 
 export default function EventsWidget({ namespace }: { namespace: Namespace }) {
   return (

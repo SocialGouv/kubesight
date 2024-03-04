@@ -338,9 +338,7 @@ export type Namespace = {
   cronjobs: Cronjob[]
 }
 
-export type KubeData = {
-  namespaces: Namespace[]
-}
+export type KubeData = Record<string, { namespaces: Namespace[] }>
 
 export function makeCachedData<T>(data: T): CachedData<T> {
   return { data, lastRefresh: new Date() }
