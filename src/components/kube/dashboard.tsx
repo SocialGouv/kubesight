@@ -71,16 +71,16 @@ export default function Dashboard({
 
   return (
     <>
-      <main className="lg:pl-72">
+      <main className="lg:pl-[230px]">
         <ul role="list">
           {kubeClusters.map(({ cluster, namespaces }) => (
             <li key={cluster}>
-              <p>Cluster: {cluster}</p>
-              <ul role="list" className="divide-y divide-gray-100">
+              <p className="p-2">Cluster: {cluster}</p>
+              <ul role="list">
                 {namespaces.map((ns) => (
                   <li
                     key={ns.name}
-                    className="gap-x-4 px-4 py-2 hover:bg-gray-50 sm:px-6 lg:px-8"
+                    className="gap-x-4 px-4 py-2 sm:px-6 lg:px-8"
                   >
                     <Namespace namespace={ns} />
                   </li>
@@ -90,7 +90,7 @@ export default function Dashboard({
           ))}
         </ul>
       </main>
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-[230px] lg:flex-col">
         <Sidebar cachedKubeData={cachedKubeData} />
       </div>
     </>

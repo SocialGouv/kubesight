@@ -21,17 +21,23 @@ export default function PodWidget({ pod }: { pod: RawPod }) {
       }
     >
       <div
-        className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-xs
+        className={`col-span-1 flex flex-row rounded-lg border-l-8 text-xs pl-1
           ${
             getPodStatus(pod) === "ok" ? "border-emerald-400" : "border-red-500"
           }
         `}
       >
-        {`${pod.metadata.name.split("-")?.pop()} | restarts: ${
-          pod.status.containerStatuses?.[0].restartCount
-        } | ${dayjs(
-          pod.metadata.creationTimestamp
-        ).fromNow()} | ${podStatusInfo}`}
+        <div className="w-10">{pod.metadata.name.split("-")?.pop()}</div>
+        <div>|</div>
+        <div className="w-24 pl-1">
+          restarts: {pod.status.containerStatuses?.[0].restartCount}
+        </div>{" "}
+        <div>|</div>
+        <div className="w-8 pl-1">
+          {dayjs(pod.metadata.creationTimestamp).fromNow()}
+        </div>
+        <div>|</div>
+        <div className="pl-1">{podStatusInfo}</div>
       </div>
     </Tooltip>
   )

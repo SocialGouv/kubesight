@@ -8,13 +8,13 @@ export default function Namespace({ namespace }: { namespace: Namespace }) {
   const namespaceIdOk = getNamespaceStatus(namespace) === "ok"
   return (
     <div
-      className={`flex divide-y divide-gray-200 rounded-lg bg-white text-center shadow border-l-8 w-full ${
+      className={`flex rounded-lg bg-white text-center  border-l-8 w-full ${
         namespaceIdOk ? "border-emerald-400" : "border-red-500"
       }
 `}
     >
       <div className="p-1 w-1/6">{namespace.name}</div>
-      <ul className="divide-y divide-gray-100 w-5/6">
+      <ul className="w-5/6">
         {namespace.deployments.length > 0 && (
           <li>
             <div className="flex w-full">

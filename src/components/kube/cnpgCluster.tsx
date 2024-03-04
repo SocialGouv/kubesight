@@ -10,7 +10,7 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
   const clusterIsOk = getCnpgClusterStatus(cluster) === "ok"
   return (
     <div
-      className={`col-span-1 rounded-lg bg-white shadow border-l-8 w-full
+      className={`col-span-1 rounded-lg bg-white border-l-8 w-full hover:bg-gray-200
       ${clusterIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >

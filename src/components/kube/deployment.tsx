@@ -11,7 +11,7 @@ export default function DeploymentWidget({
   const deploymentIsOk = getDeploymentStatus(deployment) === "ok"
   return (
     <div
-      className={`rounded-lg bg-white shadow border-l-8 text-left w-full
+      className={`rounded-lg bg-white border-l-8 text-left w-full hover:bg-gray-200
       ${deploymentIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
@@ -25,7 +25,7 @@ export default function DeploymentWidget({
 
 function Meta({ deployment }: { deployment: Deployment }) {
   return (
-    <div className="flex flex-row justify-between w-2/6 gap-x-1">
+    <div className="flex flex-row justify-between w-2/6 gap-x-1 pl-1">
       <div className="font-bold">{deployment.name}</div>
       <div className="text-xs text-gray-500 text-right flex flex-row gap-x-1 px-2">
         {deployment.logsUrl && (

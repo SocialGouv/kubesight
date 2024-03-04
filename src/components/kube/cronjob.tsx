@@ -16,7 +16,7 @@ export default function CronjobWidget({ cronjob }: { cronjob: Cronjob }) {
   const cronjobIsOk = getCronjobStatus(cronjob) === "ok"
   return (
     <div
-      className={`col-span-1 rounded-lg bg-white shadow border-l-8 w-full
+      className={`col-span-1 rounded-lg bg-white border-l-8 w-full hover:bg-gray-200
       ${cronjobIsOk ? "border-emerald-400" : "border-red-500"}
     `}
     >
@@ -30,8 +30,10 @@ export default function CronjobWidget({ cronjob }: { cronjob: Cronjob }) {
 
 function Meta({ cronjob }: { cronjob: Cronjob }) {
   return (
-    <div className="flex flex-row justify-between w-2/6 gap-x-1">
-      <div className="font-bold">{cronjob.name}</div>
+    <div className="flex flex-row justify-between w-2/6 gap-x-1 pl-1">
+      <div className="font-bold text-left whitespace-nowrap overflow-x-hidden">
+        {cronjob.name}
+      </div>
       <div className="text-xs text-gray-500 text-right flex flex-row gap-x-1 px-2">
         {cronjob.logsUrl && (
           <div>
@@ -88,7 +90,7 @@ function Job({ job }: { job: Job }) {
       }
     >
       <div
-        className={`col-span-1 rounded-lg bg-white shadow border-l-8 text-left
+        className={`col-span-1 rounded-lg bg-white border-l-8 text-left
       ${
         getJobStatus(job.raw) === "ok" ? "border-emerald-400" : "border-red-500"
       }
