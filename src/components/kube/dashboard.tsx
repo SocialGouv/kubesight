@@ -57,7 +57,6 @@ export default function Dashboard({
 
   const kubeClusters = Object.entries(cachedKubeData.data).map(
     ([cluster, clusterNamespaces]) => {
-      console.log("UI:", cluster, clusterNamespaces)
       return {
         cluster,
         namespaces: clusterNamespaces.namespaces.filter(

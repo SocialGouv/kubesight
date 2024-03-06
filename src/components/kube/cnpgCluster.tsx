@@ -2,7 +2,12 @@ import dayjs from "dayjs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFloppyDisk, faMemory } from "@fortawesome/free-solid-svg-icons"
 
-import { getCnpgClusterStatus, Cluster, getInstances } from "@/lib/kube/types"
+import {
+  getCnpgClusterStatus,
+  Cluster,
+  getInstances,
+  getCnpgClusterArchivingStatus,
+} from "@/lib/kube/types"
 import Badge from "@/components/ui/badge"
 import Tooltip from "@/components/ui/tooltip"
 
@@ -16,13 +21,21 @@ export default function ClusterWidget({ cluster }: { cluster: Cluster }) {
     >
       <div className="flex gap-x-1 w-full">
         <Meta cluster={cluster} />
-        <Instances cluster={cluster} />
-        <Backup cluster={cluster} />
-        {/* <Dumps cluster={cluster} /> */}
-        <Memory cluster={cluster} />
-        {/* <Cpu cluster={cluster} /> */}
-        {/* <Storage cluster={cluster} /> */}
-        <Phase cluster={cluster} />
+        <div className="flex flex-col gap-y-1">
+          <div className="flex flex-row gap-x-1 text-xs">
+            <Backup cluster={cluster} />
+            <div>|</div>
+            {/* <Dumps cluster={cluster} /> */}
+            <Memory cluster={cluster} />
+            {/* <Cpu cluster={cluster} /> */}
+            {/* <Storage cluster={cluster} /> */}
+            <div>|</div>
+            <Phase cluster={cluster} />
+          </div>
+          <div className="">
+            <Instances cluster={cluster} />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -67,8 +80,14 @@ function Instances({ cluster }: { cluster: Cluster }) {
       {instances.map((instance) => (
         <Badge
           key={instance.name}
-          text={instance.shortName}
-          dot={instance.isPrimary}
+          text={
+            instance.shortName +
+            " | " +
+            (instance.isPrimary ? "primary" : "replica") +
+            " | " +
+            instance.status
+          }
+          dot={false}
           status={
             instance.status === "healthy"
               ? "ok"
@@ -93,31 +112,22 @@ function Backup({ cluster }: { cluster: Cluster }) {
         </>
       }
     >
-      <div className="pt-2">
-        {cluster.status.lastSuccessfulBackup ? (
-          <>
-            <FontAwesomeIcon
-              className={`h-4 w-4 inline-block`}
-              icon={faFloppyDisk}
-            />
-            <span className="font-bold text-xs text-gray-500 pl-2">
-              {dayjs(cluster.status.firstRecoverabilityPoint).fromNow() +
-                " ➡ " +
-                dayjs(cluster.status.lastSuccessfulBackup).fromNow()}
-            </span>
-          </>
-        ) : (
-          <>
-            <FontAwesomeIcon
-              className={`h-4 w-4 inline-block text-orange-500`}
-              icon={faFloppyDisk}
-            />
-            <span className="font-bold text-xs text-orange-500 pl-2">
-              no backup
-            </span>
-          </>
-        )}
-      </div>
+      {cluster.status.lastSuccessfulBackup ? (
+        <div className="font-bold text-xs text-gray-500 pl-1">
+          {"base backup: " +
+            dayjs(cluster.status.firstRecoverabilityPoint).fromNow() +
+            " ➡ " +
+            dayjs(cluster.status.lastSuccessfulBackup).fromNow()}
+        </div>
+      ) : (
+        <div className="font-bold text-xs pl-1">
+          {getCnpgClusterArchivingStatus(cluster) === "error" ? (
+            <div className="text-red-500">ERROR wal archiving failure</div>
+          ) : (
+            <div className="text-orange-500">no base backup</div>
+          )}
+        </div>
+      )}
     </Tooltip>
   )
 }
@@ -182,12 +192,8 @@ function Memory({ cluster }: { cluster: Cluster }) {
         </>
       }
     >
-      <div className="font-bold text-xs text-gray-500 pr-2">
-        <FontAwesomeIcon
-          className={`h-4 w-4 inline-block mr-2`}
-          icon={faMemory}
-        />
-        {cluster.spec.resources?.requests?.memory ?? "none"}
+      <div className="font-bold text-xs text-gray-500">
+        request: {cluster.spec.resources?.requests?.memory ?? "none"}
       </div>
     </Tooltip>
   )
@@ -238,9 +244,7 @@ function Memory({ cluster }: { cluster: Cluster }) {
 // }
 
 function Phase({ cluster }: { cluster: Cluster }) {
-  if (cluster.status.phase !== "Cluster in healthy state") {
-    return <div className="pt-2">{cluster.status.phase}</div>
-  }
+  return <div className="text-xs">{cluster.status.phase}</div>
 }
 
 function formatBytes({

@@ -1,5 +1,6 @@
 import { z } from "zod"
 import _ from "lodash"
+import dayjs from "dayjs"
 
 export type CachedData<T> = {
   data: T
@@ -444,10 +445,40 @@ export function getPodStatus(pod: RawPod): Status {
 }
 
 export function getCnpgClusterStatus(cluster: Cluster): Status {
-  return cluster.status.instances === cluster.status.readyInstances
+  return cluster.status?.instances === cluster.status.readyInstances &&
+    getBaseBackupStatus(cluster) === "ok" &&
+    getCnpgClusterArchivingStatus(cluster) === "ok"
     ? "ok"
     : "error"
 }
+
+export function getBaseBackupStatus(cluster: Cluster): Status {
+  if (dayjs(cluster.status.lastSuccessfulBackup) < dayjs().subtract(1, "day")) {
+    return "error"
+  }
+  return "ok"
+}
+
+export function getCnpgClusterArchivingStatus(cluster: Cluster): Status {
+  const archivingCondition = cluster.status.conditions.filter(
+    (condition) => condition.type === "ContinuousArchiving"
+  )
+  return archivingCondition[0]?.reason === "ContinuousArchivingFailing"
+    ? "error"
+    : "ok"
+}
+
+// conditions:
+// - lastTransitionTime: "2024-03-05T16:08:11Z"
+//   message: Cluster is Ready
+//   reason: ClusterIsReady
+//   status: "True"
+//   type: Ready
+// - lastTransitionTime: "2024-02-14T17:28:58Z"
+//   message: 'unexpected failure invoking barman-cloud-wal-archive: exit status 1'
+//   reason: ContinuousArchivingFailing
+//   status: "False"
+//   type: ContinuousArchiving
 
 export function getDeploymentStatus(deployment: Deployment): Status {
   return deployment.raw.status.readyReplicas === deployment.raw.status.replicas
