@@ -67,7 +67,7 @@
     "husky": "^8.0.3",
     "is-ci": "^3.0.1",
     "node-talisman": "^1.29.10",
-    "pino-pretty": "^10.2.3",
+    "pino-pretty": "^11.0.0",
     "postcss": "^8",
     "prettier": "^3.1.0",
     "tailwindcss": "^3.3.0",
