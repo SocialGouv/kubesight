@@ -2460,30 +2460,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.1.1":
+"@types/node@npm:*, @types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0, @types/node@npm:^20, @types/node@npm:^20.1.1":
   version: 20.11.16
   resolution: "@types/node@npm:20.11.16"
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 4886b90278e9c877a84efd3edd4667cd990e032d77268d2a798b99ebc1901ea336fa7dfbe9eaf4ad6ad1da9ce2ec31baf300038a3905838692362eb19904ebde
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0":
-  version: 20.10.4
-  resolution: "@types/node@npm:20.10.4"
-  dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 2c8b70cba731eb2ae3ae046daa74903bfcbb0e7b9196da767e5895054f6d252296ae7a04fb1dbbcb53bb004c4c658c05eaea2731bc9e2dd9e08f7e88d672f563
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^20":
-  version: 20.9.1
-  resolution: "@types/node@npm:20.9.1"
-  dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 0cb52c0840fe9a2e8f988564da6823bb3141e34fef8cb7264762c851c0dac5d9ef4859db422dfa41cd1a864ad126a9bd3b588d0285bc9af6de814de3280da9b3
   languageName: node
   linkType: hard
 
@@ -5165,7 +5147,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^8.0.0, glob@npm:^8.0.3":
+"glob@npm:^8.0.3":
   version: 8.1.0
   resolution: "glob@npm:8.1.0"
   dependencies:
@@ -5337,13 +5319,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"help-me@npm:^4.0.1":
-  version: 4.2.0
-  resolution: "help-me@npm:4.2.0"
-  dependencies:
-    glob: "npm:^8.0.0"
-    readable-stream: "npm:^3.6.0"
-  checksum: e61ef2de21c550896f4df40f1456baf22077205f3753af481d4408fd57f191d630306175edd8c083100cb14f7986d5058ce977876eac48e71962451321455b7b
+"help-me@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "help-me@npm:5.0.0"
+  checksum: 054c0e2e9ae2231c85ab5e04f75109b9d068ffcc54e58fb22079822a5ace8ff3d02c66fd45379c902ad5ab825e5d2e1451fcc2f7eab1eb49e7d488133ba4cacb
   languageName: node
   linkType: hard
 
@@ -6186,7 +6165,7 @@ __metadata:
     p-map: "npm:^6.0.0"
     pino: "npm:^8.16.2"
     pino-http: "npm:^8.5.1"
-    pino-pretty: "npm:^10.2.3"
+    pino-pretty: "npm:^11.0.0"
     postcss: "npm:^8"
     prettier: "npm:^3.1.0"
     react: "npm:^18"
@@ -7343,15 +7322,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^10.2.3":
-  version: 10.2.3
-  resolution: "pino-pretty@npm:10.2.3"
+"pino-pretty@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "pino-pretty@npm:11.0.0"
   dependencies:
     colorette: "npm:^2.0.7"
     dateformat: "npm:^4.6.3"
     fast-copy: "npm:^3.0.0"
     fast-safe-stringify: "npm:^2.1.1"
-    help-me: "npm:^4.0.1"
+    help-me: "npm:^5.0.0"
     joycon: "npm:^3.1.1"
     minimist: "npm:^1.2.6"
     on-exit-leak-free: "npm:^2.1.0"
@@ -7363,7 +7342,7 @@ __metadata:
     strip-json-comments: "npm:^3.1.1"
   bin:
     pino-pretty: bin.js
-  checksum: 24962925475ce945fda1377ff9b13bf97bdb7b3c42524d38ade233607e692c0210095fadc02899376a0f4f2bfc1605581c4af1ea7cfcc2385ccdbb7551342451
+  checksum: d42213f3fdf19d92152b0a14683b2bb8443423739c81ab7c1181a5dac0e0ca7621d232c8264ece81edc01106ca2a8e165783daca0a902f0fde480027075d5540
   languageName: node
   linkType: hard
 
@@ -7752,7 +7731,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2, readable-stream@npm:^3.6.0":
+"readable-stream@npm:3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2":
   version: 3.6.2
   resolution: "readable-stream@npm:3.6.2"
   dependencies:
